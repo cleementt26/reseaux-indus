@@ -2,6 +2,8 @@
 
 Site de révision en français : 12 chapitres, les cinq exercices du TD corrigés pas à pas, des schémas, des formules, des calculateurs et une méthode pour refaire le TP Packet Tracer.
 
+[Ouvrir le site de révision](https://cleementt26.github.io/revision-reseaux-communication/)
+
 ## Hébergement
 
 Site statique sans compilation ni dépendance externe. GitHub Pages doit publier la branche `main` depuis la racine (`/`). Les fichiers à conserver ensemble sont `index.html`, `styles.css`, `app.js` et `.nojekyll`.
@@ -15,3 +17,7 @@ Modifier les fichiers puis enregistrer les changements dans `main`. GitHub Pages
 Contenu pédagogique établi à partir des CM séances 1–3, du TD et de son corrigé, ainsi que du TP1. Les exemples ajoutés sont identifiés dans le site. Les documents originaux et leurs liens Drive ne sont pas publiés.
 
 Les fichiers `.pkt` n'ont pas été exécutés pour créer ce site. Les résultats rapportés dans le TP sont distingués des vérifications effectuées sur les calculateurs du site.
+
+## Sur téléphone
+
+Menu tactile avec fermeture, boutons d’au moins 44 px, champs lisibles sans zoom automatique et schémas défilables à leur taille de lecture. Les tableaux larges défilent dans leur propre zone.
