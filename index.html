@@ -1,0 +1,777 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Réseaux · Réviser et comprendre</title><meta name="description" content="Tes cours de réseaux expliqués simplement, les exercices du TD pas à pas, les formules et le TP Packet Tracer."><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1d36'/%3E%3Cpath d='M8 9L24 9L16 24Z' fill='none' stroke='%2369e1ec' stroke-width='2'/%3E%3Cg fill='%2369e1ec'%3E%3Ccircle cx='8' cy='9' r='3'/%3E%3Ccircle cx='24' cy='9' r='3'/%3E%3Ccircle cx='16' cy='24' r='3'/%3E%3C/g%3E%3C/svg%3E"><link rel="stylesheet" href="styles.css"></head><body><a class="skip" href="#main">Aller au contenu</a><div class="shell"><aside class="sidebar" id="sidebar"><a class="brand" href="#c-reperes"><svg class="brandmark" viewBox="0 0 42 42" aria-hidden="true"><path d="M8 10H34L21 34Z" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><circle cx="8" cy="10" r="4"/><circle cx="34" cy="10" r="4"/><circle cx="21" cy="34" r="4"/></g></svg><span>Réseaux<small>RÉVISER & COMPRENDRE</small></span></a><div class="deadline">Contrôle<strong>Lundi 5 octobre 2026</strong></div><nav class="mode-nav" aria-label="Parties du site"><a class="active" href="#c-reperes" data-group="cours"><span class="icon" aria-hidden="true">▤</span>Comprendre le cours</a><a href="#e-fragmentation" data-group="exercices"><span class="icon" aria-hidden="true">✎</span>Refaire les exercices</a><a href="#f-formules" data-group="formules"><span class="icon" aria-hidden="true">ƒ</span>Les formules</a><a href="#tp-reseau" data-group="tp"><span class="icon" aria-hidden="true">⌘</span>Packet Tracer</a><a href="#s-sources" data-group="sources"><span class="icon" aria-hidden="true">◷</span>Supports & suite</a></nav><nav class="chapter-nav" aria-label="Chapitres"><div class="chapter-label" id="chapter-label">Le cours</div><div id="chapter-links"><a href="#c-reperes" class="active">Les repères essentiels</a></div></nav><p class="sidebar-note">Séances 1 à 3 · TD · TP1<br>Le cours du 2 octobre sera à ajouter.</p></aside><div class="main"><header class="topbar"><button class="menu-button" type="button" aria-label="Ouvrir le menu" aria-controls="sidebar" aria-expanded="false">☰</button><span class="context">Communication & réseaux locaux industriels</span><span class="status">Supports analysés au 1er octobre</span></header><main id="main" class="content-wrap" tabindex="-1"><div class="breadcrumb" id="breadcrumb">Comprendre le cours</div><div id="lessons"><section class="lesson" id="c-reperes" data-group="cours"><h2>Le message, le paquet et la trame</h2><p class="lead">Pour comprendre les exercices, commence par distinguer les enveloppes qui transportent une donnée.</p><div class="diagram"><h3>Une donnée voyage dans plusieurs enveloppes</h3><div class="envelopes"><div class="env" data-level="2"><strong>Ethernet · couche 2</strong><span>MAC source + MAC destination</span><div class="env" data-level="3"><strong>IP · couche 3</strong><span>IP source + IP destination</span><div class="env" data-level="4"><strong>TCP · couche 4</strong><span>Ports des applications</span><div class="env"><strong>La donnée</strong><span>Ton message</span></div></div></div></div></div><p class="caption">Une trame Ethernet contient un paquet IP, qui peut contenir un segment TCP. À l’arrivée, le destinataire retire les enveloppes dans l’ordre inverse.</p></div><div class="grid-two"><div class="panel"><h3>Le switch</h3><p>Il transmet une <strong>trame</strong> vers la bonne adresse <strong>MAC</strong>, à l’intérieur d’un VLAN.</p></div><div class="panel"><h3>Le routeur</h3><p>Il choisit le prochain réseau pour un <strong>paquet</strong>, grâce à l’adresse <strong>IP</strong> de destination.</p></div></div><div class="takeaway"><strong>Le repère qui débloque le TD</strong><p>Dans l’exercice de fragmentation, on découpe le <strong>paquet IPv4</strong>. Le checksum, le CRC et les VLAN répondent à d’autres questions : détecter une erreur ou séparer les réseaux locaux.</p></div><h3>Les exercices à savoir refaire</h3><div class="cards"><a class="card" href="#e-fragmentation"><span class="number">EXERCICE 1</span><strong>Fragmenter un paquet IPv4</strong><p>IHL, MTU, tailles, offsets et MF.</p></a><a class="card" href="#e-checksum"><span class="number">EXERCICE 2A</span><strong>Calculer un checksum</strong><p>Somme hexadécimale, report et complément.</p></a><a class="card" href="#e-crc"><span class="number">EXERCICE 2B</span><strong>Diviser pour trouver le CRC</strong><p>XOR, générateur, reste et vérification.</p></a><a class="card" href="#e-aloha"><span class="number">EXERCICE 3</span><strong>Maximiser Slotted ALOHA</strong><p>Probabilité optimale et limite 1/e.</p></a><a class="card" href="#e-vlan"><span class="number">EXERCICE 4</span><strong>Concevoir les VLAN</strong><p>Ports, broadcast, trunk et inter-VLAN.</p></a><a class="card" href="#e-dijkstra"><span class="number">EXERCICE 5</span><strong>Trouver le chemin minimal</strong><p>Distances, prédécesseurs et Python.</p></a></div><div class="callout"><strong>Le cours de demain viendra compléter cette version.</strong><p>Commence par les repères puis les exercices. CAN et les réseaux de capteurs sont annoncés dans le sommaire, mais ne sont pas encore développés dans les supports disponibles.</p></div></section>
+<section class="lesson" id="c-network" data-keywords="réseau LAN WAN MAN GAN client serveur routeur switch protocole normes IEEE ISO" data-group="cours">
+  <h2>1. Un réseau, à quoi ça sert ?</h2>
+  <p class="lead">Un réseau permet à des équipements d'échanger des données et de partager des ressources. Pour communiquer, ils ont besoin d'un support et de règles communes.</p>
+  <h3>Les trois ingrédients d'une communication</h3>
+  <p><strong>Des équipements</strong> produisent ou reçoivent les données : PC, serveur, automate, capteur. <strong>Un support</strong> transporte des signaux : cuivre, fibre optique ou radio. <strong>Un protocole</strong> définit comment parler : forme des messages, sens des champs et ordre des échanges. Deux appareils reliés par un câble ne se comprennent pas forcément s'ils ne suivent pas le même protocole.</p>
+  <h3>Le rôle de chaque élément</h3>
+  <table><thead><tr><th>Élément</th><th>Rôle à retenir</th><th>Exemple</th></tr></thead><tbody>
+    <tr><td>Client</td><td>Demande un service.</td><td>Ton PC demande un fichier.</td></tr>
+    <tr><td>Serveur</td><td>Fournit un service ou une ressource.</td><td>Le serveur stocke et envoie le fichier.</td></tr>
+    <tr><td>Interface réseau / NIC</td><td>Permet d'émettre et de recevoir sur un lien.</td><td>Interface Ethernet ou Wi-Fi du PC.</td></tr>
+    <tr><td>Commutateur / switch</td><td>Relie les équipements d'un réseau local.</td><td>Les PC d'une salle sont branchés à un switch.</td></tr>
+    <tr><td>Routeur</td><td>Achemine les paquets entre réseaux.</td><td>Il relie le réseau de la salle à un autre réseau.</td></tr>
+    <tr><td>Passerelle / gateway</td><td>Point de passage vers un autre réseau ou système.</td><td>La passerelle par défaut est généralement un routeur local.</td></tr>
+  </tbody></table>
+  <h3>Local, étendu, mondial</h3>
+  <p><strong>LAN</strong> : réseau local d'un bâtiment ou d'un site. <strong>MAN</strong> : échelle d'une agglomération. <strong>WAN</strong> : plusieurs sites séparés par de grandes distances. <strong>GAN</strong> : échelle mondiale. Un <strong>backbone</strong> est une dorsale qui relie et agrège plusieurs réseaux, par exemple les LAN des bâtiments d'un campus.</p>
+  <p>Internet est un réseau de réseaux. Le <strong>Web</strong> est un service qui utilise Internet, comme le courrier électronique ou le transfert de fichiers : Internet et Web ne sont pas synonymes.</p>
+  <h3>Pourquoi des normes ?</h3>
+  <p>Les normes rendent compatibles les équipements de fabricants différents. Repères : <strong>ISO</strong>, normalisation internationale et modèle OSI ; <strong>IEEE</strong>, notamment les réseaux locaux et Ethernet ; <strong>ITU-T</strong>, télécommunications ; <strong>IETF</strong>, protocoles Internet. ANSI, EIA, TIA, IAB et IRTF sont aussi cités dans le support.</p>
+  <aside class="note"><strong>À retenir.</strong> Les tailles et débits donnés pour LAN/WAN dans le cours sont des exemples historiques, pas des limites universelles. Pour reconnaître un LAN, pense d'abord à son étendue locale et à son administration.</aside>
+  <p class="source">Sources : CM 1–2, diapositives 8–25 et 39.</p>
+</section>
+
+<section class="lesson" id="c-topologies" data-keywords="topologie étoile maillage bus anneau physique logique liens câble hub switch" data-group="cours">
+  <h2>2. Topologies : comment les équipements sont reliés</h2>
+  <p class="lead">La topologie physique décrit les connexions réelles. La topologie logique décrit la manière dont les données circulent. Elles ne sont pas toujours identiques.</p>
+  <figure class="diagram"><svg class="diagram-svg" viewBox="0 0 720 245" role="img" aria-label="Schémas comparant étoile, bus, anneau et maillage complet de quatre nœuds"><g stroke="#225ce0" stroke-width="3" fill="none"><path d="M90 110V50M90 110L32 160M90 110L148 160M90 110L32 65M90 110L148 65"/><path d="M195 115H340M215 115V75M260 115V160M315 115V75"/><path d="M440 55L490 115L440 175L390 115Z"/><path d="M560 60L665 60L665 170L560 170ZM560 60L665 170M665 60L560 170"/></g><g fill="#0b1d36"><rect x="77" y="97" width="26" height="26" rx="5"/><circle cx="90" cy="50" r="9"/><circle cx="32" cy="65" r="9"/><circle cx="148" cy="65" r="9"/><circle cx="32" cy="160" r="9"/><circle cx="148" cy="160" r="9"/><circle cx="215" cy="75" r="9"/><circle cx="260" cy="160" r="9"/><circle cx="315" cy="75" r="9"/><circle cx="440" cy="55" r="9"/><circle cx="490" cy="115" r="9"/><circle cx="440" cy="175" r="9"/><circle cx="390" cy="115" r="9"/><circle cx="560" cy="60" r="9"/><circle cx="665" cy="60" r="9"/><circle cx="560" cy="170" r="9"/><circle cx="665" cy="170" r="9"/></g><g font-size="17" text-anchor="middle" fill="#10213b" font-weight="650"><text x="90" y="220">Étoile</text><text x="267" y="220">Bus</text><text x="440" y="220">Anneau</text><text x="612" y="220">Maillage</text></g></svg><figcaption>Les points sont les stations ; les traits sont les liaisons. Dans l’étoile, le carré représente l’équipement central.</figcaption></figure>
+  <h3>Comparer les structures</h3>
+  <table><thead><tr><th>Topologie</th><th>Principe</th><th>Point fort</th><th>Point faible</th></tr></thead><tbody>
+    <tr><td>Maillage complet</td><td>Chaque station rejoint directement toutes les autres.</td><td>Plusieurs chemins possibles, résistance à une rupture.</td><td>Beaucoup de liens, coût élevé.</td></tr>
+    <tr><td>Étoile</td><td>Chaque station rejoint un élément central.</td><td>Une rupture de câble n'isole qu'une station.</td><td>Le centre constitue un point critique.</td></tr>
+    <tr><td>Bus</td><td>Les stations partagent une dorsale.</td><td>Peu de câbles.</td><td>Rupture du bus et accès partagé.</td></tr>
+    <tr><td>Anneau simple</td><td>Les stations forment une boucle.</td><td>Circulation organisée entre voisines.</td><td>Une coupure peut arrêter l'anneau simple.</td></tr>
+    <tr><td>Hybride</td><td>Plusieurs topologies sont combinées.</td><td>Adaptation à plusieurs zones.</td><td>Dépend des structures combinées.</td></tr>
+  </tbody></table>
+  <h3>Calculer les liens d'un maillage complet</h3>
+  <p>Avec <var>n</var> stations, chacune se relie aux <var>n − 1</var> autres. Le produit <var>n(n − 1)</var> compte chaque câble deux fois : A–B et B–A désignent le même câble. Pour des liens physiques non orientés :</p>
+  <div class="formula">Nombre de liens = n(n − 1) / 2</div>
+  <div class="example"><strong>Exemple pédagogique.</strong> 5 stations → 5 × 4 / 2 = <strong>10 liens</strong>. En étoile avec 5 stations et un switch central, il faut <strong>5 liens</strong>. Vérifie si l'énoncé compte le centre parmi les <var>n</var> équipements.</div>
+  <h3>Raisonner sur une panne</h3>
+  <ol class="steps"><li>Repère le lien ou l'équipement qui tombe en panne.</li><li>Demande-toi quels nœuds conservent un chemin de communication.</li><li>Explique la conséquence : station isolée, interruption globale ou détour possible.</li></ol>
+  <aside class="note"><strong>Piège de vocabulaire.</strong> Un <strong>hub</strong> répète les signaux ; un <strong>switch</strong> commute les trames et peut les stocker avant de les transmettre. Le « store-and-forward » décrit le switch. Le support compte n(n−1) dans le maillage : indique ta convention avant de compter des câbles.</aside>
+  <p class="source">Sources : CM 1–2, diapositives 28–37. Le titre « bus » de la diapositive 36 correspond en réalité à la suite de l'anneau.</p>
+</section>
+
+<section class="lesson" id="c-osi" data-keywords="OSI TCP IP couches application présentation session transport réseau liaison physique segment paquet trame bits" data-group="cours">
+  <h2>3. OSI : qui fait quoi dans les sept couches ?</h2>
+  <p class="lead">Chaque couche réalise une partie du travail. À l'émission, les données descendent de la couche 7 vers la couche 1. À la réception, elles remontent de 1 vers 7.</p>
+  <h3>La carte à savoir refaire</h3>
+  <table><thead><tr><th>N°</th><th>Couche</th><th>Fonction principale</th><th>Repère concret</th></tr></thead><tbody>
+    <tr><td>7</td><td>Application</td><td>Fournir les services réseau aux applications.</td><td>Web, mail, transfert de fichiers.</td></tr>
+    <tr><td>6</td><td>Présentation</td><td>Représenter et transformer les données.</td><td>Encodage, compression, chiffrement.</td></tr>
+    <tr><td>5</td><td>Session</td><td>Ouvrir, maintenir et terminer le dialogue.</td><td>Gestion d'une session.</td></tr>
+    <tr><td>4</td><td>Transport</td><td>Faire communiquer les applications de bout en bout.</td><td>Segment TCP / datagramme UDP, ports.</td></tr>
+    <tr><td>3</td><td>Réseau</td><td>Adresser et acheminer entre réseaux.</td><td>Paquet IP, IP, routeur.</td></tr>
+    <tr><td>2</td><td>Liaison</td><td>Transmettre entre voisins sur une liaison.</td><td>Trame, MAC, switch.</td></tr>
+    <tr><td>1</td><td>Physique</td><td>Transmettre les bits sous forme de signaux.</td><td>Câble, fibre, radio, bits.</td></tr>
+  </tbody></table>
+  <h3>Un exemple qui relie les couches</h3>
+  <p>Tu demandes un fichier : l'application utilise un service réseau ; le transport organise l'échange entre applications ; IP permet de joindre la machine distante ; Ethernet porte le paquet jusqu'au prochain équipement local ; le support transmet les bits. Le destinataire réalise l'opération inverse pour rendre les données à son application.</p>
+  <h3>Passer d'OSI à TCP/IP</h3>
+  <p>Le support représente TCP/IP avec quatre couches : <strong>Application</strong> regroupe OSI 5, 6 et 7 ; <strong>Transport</strong> correspond à OSI 4 ; <strong>Internet</strong> à OSI 3 ; <strong>Accès réseau</strong> regroupe OSI 1 et 2.</p>
+  <h3>Reconnaître la couche dans une question</h3>
+  <p>« Signal ou câble » → 1. « Trame, MAC ou switch » → 2. « Paquet, IP ou routeur » → 3. « Application distante, TCP/UDP ou port » → 4. « Session » → 5. « Encodage/chiffrement/compression » → 6. « Service Web/mail/fichier » → 7.</p>
+  <aside class="note"><strong>Attention.</strong> Le modèle décrit des fonctions ; chaque protocole n'assure pas forcément toutes les fonctions possibles de sa couche. IP ne garantit ni livraison ni ordre. UDP n'offre pas automatiquement la fiabilité de TCP. Un routeur décide en couche 3, mais utilise aussi les couches 1 et 2 de ses interfaces.</aside>
+  <p class="source">Sources : CM 1–2, diapositives 41–42, 59–74 et 92.</p>
+</section>
+
+<section class="lesson" id="c-encapsulation" data-keywords="encapsulation SDU PDU PCI segmentation groupage réassemblage MTU surcharge rendement" data-group="cours">
+  <h2>4. Encapsulation : les données dans des enveloppes</h2>
+  <p class="lead">Une couche reçoit une donnée, ajoute ses informations de contrôle et transmet le nouvel ensemble à la couche inférieure. Le destinataire retire ces enveloppes dans l'ordre inverse.</p>
+  <div class="diagram"><h3>Regarde ce qu’ajoute chaque couche</h3><div class="layer-buttons" role="group" aria-label="Choisir une enveloppe"><button data-layer="4" aria-pressed="true">TCP · segment</button><button data-layer="3" aria-pressed="false">IPv4 · paquet</button><button data-layer="2" aria-pressed="false">Ethernet · trame</button></div><div class="envelopes" style="margin-top:16px"><div class="env" data-level="2"><strong>En-tête Ethernet</strong><span>MAC source / destination</span><div class="env" data-level="3"><strong>En-tête IPv4</strong><span>IP source / destination</span><div class="env selected" data-level="4"><strong>En-tête TCP</strong><span>Ports source / destination</span><div class="env"><strong>Données de l’application</strong></div></div></div><span>FCS · contrôle de fin de trame</span></div></div><p class="layer-explain" aria-live="polite">TCP ajoute les ports et les informations utiles à un échange fiable. Le résultat est un segment TCP.</p><p class="caption">Schéma simplifié : Ethernet contient IPv4, qui contient TCP. À un routeur, l’enveloppe Ethernet est remplacée ; les IP de départ et d’arrivée restent ici les mêmes, sans NAT.</p></div>
+  <h3>SDU, PCI et PDU</h3>
+  <p><strong>SDU</strong> : donnée reçue de la couche supérieure. <strong>PCI</strong> : informations de contrôle ajoutées par la couche. <strong>PDU</strong> : unité complète construite par cette couche. Une PDU devient la donnée à transporter pour la couche suivante.</p>
+  <div class="formula">Taille de la PDU = taille de la SDU + taille des informations de contrôle</div>
+  <p>Exemple : <strong>segment</strong> = en-tête transport + données ; <strong>paquet</strong> = en-tête IP + segment ; <strong>trame</strong> = en-tête liaison + paquet + contrôle de fin de trame. Les champs de contrôle ne sont donc pas tous au même niveau.</p>
+  <h3>Découper ou regrouper</h3>
+  <p><strong>Segmentation</strong> : une grande donnée est découpée en plusieurs unités. <strong>Réassemblage</strong> : les morceaux sont réunis à réception. <strong>Groupage</strong> : plusieurs petites données sont réunies dans une unité. Pour choisir le mot, regarde si l'on passe d'une unité à plusieurs, ou de plusieurs à une.</p>
+  <h3>Calculer la taille totale transmise</h3>
+  <ol class="steps"><li>Identifie la taille des données utiles et la capacité <em>utile</em> de chaque unité.</li><li>Calcule le nombre d'unités, en arrondissant au-dessus.</li><li>Ajoute les champs de contrôle à <strong>chaque</strong> unité.</li><li>Additionne leurs tailles et vérifie les unités.</li></ol>
+  <div class="formula">Nombre d'unités = ⌈ données utiles / capacité utile ⌉<br>Rendement utile = données utiles / données totales transmises</div>
+  <div class="example"><strong>Exemple pédagogique.</strong> 2 000 octets utiles, capacité de 1 000 octets et en-tête de 20 octets par unité : 2 unités de 1 020 octets, soit <strong>2 040 octets transmis</strong>. Rendement : 2 000 / 2 040 ≈ <strong>98,04 %</strong>.</div>
+  <aside class="note"><strong>Pièges.</strong> Après découpage, il faut plusieurs en-têtes. La <strong>MTU Ethernet de 1 500 octets</strong> limite le paquet IP transporté, pas les seules données de l'application : les en-têtes IP/transport prennent déjà une partie de cette place.</aside>
+  <details><summary>Les primitives de service du modèle</summary><p><strong>Request</strong> : demande d'un service. <strong>Indication</strong> : notification au destinataire. <strong>Response</strong> : réponse. <strong>Confirmation</strong> : notification à l'initiateur. Les figures du cours illustrent un modèle de dialogue ; elles ne signifient pas qu'Ethernet ou IP établit systématiquement une connexion avant chaque paquet.</p></details>
+  <p class="source">Sources : CM 1–2, diapositives 43–58 et 65–67. Les formules de rendement sont des applications directes du calcul des tailles.</p>
+</section>
+
+<section class="lesson" id="c-ipv4" data-keywords="IPv4 adresse masque CIDR réseau broadcast NetID HostID binaire classe hôtes sous-réseau" data-group="cours">
+  <h2>5. IPv4 : adresse, masque, réseau et broadcast</h2>
+  <p class="lead">Une adresse IPv4 indique une connexion à un réseau. Le masque précise quels bits identifient le réseau et quels bits identifient l'hôte dans ce réseau.</p>
+  <h3>Lire les 32 bits</h3>
+  <p>IPv4 = <strong>32 bits = 4 octets</strong>. Chaque octet va de 0 à 255. Dans un octet, les poids de gauche à droite sont <strong>128, 64, 32, 16, 8, 4, 2, 1</strong>. Ainsi, 192 = 128 + 64 = <code>11000000</code>, et 168 = 128 + 32 + 8 = <code>10101000</code>.</p>
+  <h3>Le masque sépare réseau et hôte</h3>
+  <p>Les bits à <strong>1</strong> du masque désignent la partie réseau ; les bits à <strong>0</strong> désignent la partie hôte. Un préfixe <strong>/p</strong> signifie que les <var>p</var> premiers bits sont des bits réseau. Par exemple /24 = <code>255.255.255.0</code>.</p>
+  <div class="formula">Bits hôte h = 32 − p<br>Nombre d'adresses = 2<sup>h</sup><br>Hôtes utilisables dans le cadre classique = 2<sup>h</sup> − 2</div>
+  <p>On retire deux adresses parce que les bits hôte tous à 0 désignent le <strong>réseau</strong> et les bits hôte tous à 1 désignent le <strong>broadcast</strong>. Cette formule est celle des sous-réseaux usuels du cours ; les cas particuliers /31 et /32 ne sont pas développés dans les supports.</p>
+  <h3>La méthode à appliquer</h3>
+  <ol class="steps"><li>Lis le masque ou le préfixe. Ne suppose pas /24 parce que l'adresse « ressemble à » une classe C.</li><li>Calcule le réseau : <strong>IP ET masque</strong>, bit à bit.</li><li>Mets tous les bits hôte à 1 pour trouver le broadcast.</li><li>La plage des hôtes va de réseau + 1 à broadcast − 1 dans le cadre classique.</li><li>Deux adresses sont dans le même sous-réseau si le calcul leur donne la même adresse réseau.</li></ol>
+  <div class="example"><strong>Exemple pédagogique.</strong> <code>192.168.1.34/24</code> : réseau <code>192.168.1.0</code>, broadcast <code>192.168.1.255</code>, hôtes <code>192.168.1.1</code> à <code>192.168.1.254</code>. Il reste 8 bits hôte : 2⁸ − 2 = <strong>254 hôtes</strong>.</div>
+  <h3>Les classes historiques du support</h3>
+  <table><thead><tr><th>Classe</th><th>Premier octet</th><th>Masque par défaut</th><th>Usage</th></tr></thead><tbody>
+    <tr><td>A</td><td>1–126</td><td>255.0.0.0 /8</td><td>Très grands réseaux historiques</td></tr>
+    <tr><td>B</td><td>128–191</td><td>255.255.0.0 /16</td><td>Réseaux intermédiaires historiques</td></tr>
+    <tr><td>C</td><td>192–223</td><td>255.255.255.0 /24</td><td>Petits réseaux historiques</td></tr>
+    <tr><td>D</td><td>224–239</td><td>Pas de masque de classe</td><td>Multicast</td></tr>
+    <tr><td>E</td><td>240–255</td><td>Pas de masque de classe</td><td>Réservé / expérimental</td></tr>
+  </tbody></table>
+  <aside class="note"><strong>À ne pas confondre.</strong> <code>127.x.x.x</code> est le retour local ; <code>255.255.255.255</code> est la diffusion limitée. « HostID = 1 » dans le support veut dire <strong>tous les bits hôte à 1</strong>, pas l'hôte n° 1. La classe n'enlève le besoin d'un masque que dans l'ancien cadre avec masque par défaut ; un /p explicite prime en exercice.</aside>
+  <p class="source">Sources : CM 1–2, diapositives 77–85.</p>
+</section>
+
+<section class="lesson" id="c-arp" data-keywords="ARP MAC IP broadcast request reply cache passerelle adresse physique interface" data-group="cours">
+  <h2>6. IP, MAC et ARP : atteindre le bon voisin</h2>
+  <p class="lead">L'IP permet de désigner une destination à travers les réseaux. La MAC permet d'adresser la trame sur le lien local. ARP retrouve la MAC correspondant à une IP locale.</p>
+  <h3>Deux adresses pour deux fonctions</h3>
+  <table><thead><tr><th>Adresse</th><th>Couche</th><th>Fonction</th><th>Taille</th></tr></thead><tbody>
+    <tr><td>IPv4</td><td>3, réseau</td><td>Adressage logique et acheminement entre réseaux</td><td>32 bits / 4 octets</td></tr>
+    <tr><td>MAC Ethernet</td><td>2, liaison</td><td>Identification d'une interface sur le lien local</td><td>48 bits / 6 octets</td></tr>
+  </tbody></table>
+  <p>Une MAC s'écrit avec six paires hexadécimales, par exemple <code>AA:BB:CC:DD:EE:FF</code>. Une interface possède une adresse ; une machine avec plusieurs interfaces peut donc avoir plusieurs MAC et plusieurs IP. La MAC n'est pas calculée à partir de l'IP.</p>
+  <figure class="diagram"><svg class="diagram-svg" viewBox="0 0 720 205" role="img" aria-label="ARP cherche la MAC de la cible locale, ou celle de la passerelle pour une cible distante"><path d="M145 92H275M410 92H555" stroke="#225ce0" stroke-width="3"/><g fill="#eaf3ff" stroke="#86a9de" stroke-width="2"><rect x="10" y="55" width="145" height="80" rx="9"/><rect x="275" y="55" width="145" height="80" rx="9"/><rect x="555" y="55" width="155" height="80" rx="9"/></g><g text-anchor="middle" font-size="17" fill="#10213b"><text x="82" y="82" font-weight="700">Ton PC</text><text x="82" y="108" font-size="14">192.168.1.10/24</text><text x="347" y="82" font-weight="700">Passerelle</text><text x="347" y="108" font-size="14">192.168.1.1</text><text x="632" y="82" font-weight="700">PC distant</text><text x="632" y="108" font-size="14">192.168.2.20/24</text><text x="212" y="40" font-size="14">MAC de la passerelle</text><text x="360" y="176" font-size="15">Le paquet IP vise le PC distant ; la trame locale vise la passerelle.</text></g></svg><figcaption>Exemple pédagogique. ARP Request est un broadcast local. Le routeur ne propage pas ce broadcast dans les autres réseaux.</figcaption></figure>
+  <h3>Quand A connaît l'IP de B, mais pas sa MAC</h3>
+  <ol class="steps"><li>A consulte son <strong>cache ARP</strong>.</li><li>Si l'association manque et que B est sur le lien local, A diffuse une <strong>ARP Request</strong> : « qui possède l'IP de B ? ».</li><li>B répond avec une <strong>ARP Reply</strong> contenant sa MAC.</li><li>A mémorise l'association IP → MAC.</li><li>A envoie sa trame avec la MAC de B comme destination locale.</li></ol>
+  <p>La MAC de diffusion <code>FF:FF:FF:FF:FF:FF</code> contient 48 bits à 1. Elle permet de faire recevoir la requête aux autres équipements du domaine de diffusion.</p>
+  <h3>Et si la destination est sur un autre réseau ?</h3>
+  <p>A doit d'abord passer par sa <strong>passerelle locale</strong>. Il cherche donc la MAC de cette passerelle avec ARP. Sur ce premier lien, la trame porte la MAC du routeur ; le paquet IP conserve comme destination l'IP de B. C'est la différence entre <strong>destination finale du paquet</strong> et <strong>prochain équipement de la trame</strong>.</p>
+  <aside class="note"><strong>Pièges.</strong> ARP n'attribue pas les IP : DHCP peut le faire. ARP n'est pas un algorithme de routage. Il associe une IP locale à une MAC. Les adresses MAC sont conçues pour identifier des interfaces, mais peuvent être modifiées ; ne considère pas leur unicité comme une preuve de sécurité.</aside>
+  <p class="source">Sources : CM 1–2, diapositives 84–90 ; CM 3, diapositives 58–64. Le cas de la passerelle explicite la distinction liaison/réseau.</p>
+</section>
+
+<section class="lesson" id="c-fragmentation" data-keywords="IP IPv4 en-tête IHL MTU fragmentation offset DF MF TTL identification checksum longueur" data-group="cours">
+  <h2>7. IPv4 : en-tête et fragmentation</h2>
+  <p class="lead">Si un paquet IPv4 est trop grand pour une liaison, il peut être découpé en fragments, si cela est autorisé. Chaque fragment possède son propre en-tête IP.</p>
+  <h3>Les champs importants</h3>
+  <table><thead><tr><th>Champ</th><th>Ce qu'il faut comprendre</th></tr></thead><tbody>
+    <tr><td>Version</td><td>4 pour IPv4.</td></tr>
+    <tr><td>IHL</td><td>Longueur de l'en-tête en mots de 32 bits : H = 4 × IHL octets ; minimum 20 octets.</td></tr>
+    <tr><td>Total Length</td><td>Taille totale du paquet en octets, <strong>en-tête compris</strong>.</td></tr>
+    <tr><td>Identification</td><td>Permet d'associer les fragments d'un même paquet.</td></tr>
+    <tr><td>DF</td><td>Interdit la fragmentation lorsqu'il vaut 1.</td></tr>
+    <tr><td>MF</td><td>Vaut 1 s'il reste d'autres fragments ; 0 pour le dernier.</td></tr>
+    <tr><td>Fragment Offset</td><td>Position des données du fragment dans les données originales, par blocs de 8 octets.</td></tr>
+    <tr><td>TTL</td><td>Empêche qu'un paquet circule indéfiniment dans une boucle.</td></tr>
+    <tr><td>Protocol</td><td>Indique quel protocole est transporté dans les données.</td></tr>
+    <tr><td>Header checksum</td><td>Contrôle uniquement l'en-tête IPv4.</td></tr>
+    <tr><td>Source / destination</td><td>Adresses IP de départ et d'arrivée.</td></tr>
+  </tbody></table>
+  <h3>La méthode de fragmentation</h3>
+  <p>La <strong>MTU</strong> limite la taille de chaque paquet transporté sur la liaison. Retire l'en-tête avant de calculer la place disponible pour les données. Les données de tous les fragments sauf le dernier doivent être un multiple de 8 octets pour que les offsets soient exprimables.</p>
+  <div class="formula">H = 4 × IHL<br>P = longueur originale totale − H<br>Charge maximale non finale = 8 × ⌊ (MTU − H) / 8 ⌋<br>Offset = données déjà placées dans les fragments précédents / 8</div>
+  <ol class="steps"><li>Calcule H et P.</li><li>Calcule la capacité utile et arrondis vers le bas à un multiple de 8.</li><li>Découpe P ; ajoute H à <strong>chaque</strong> fragment.</li><li>Calcule les offsets cumulés, en unités de 8 octets.</li><li>Mets MF à 1 sauf sur le dernier ; garde l'identification commune.</li><li>Vérifie que la somme des charges utiles redonne P et que chaque taille totale respecte la MTU.</li></ol>
+  <div class="example"><strong>Exemple pédagogique.</strong> Paquet de 2 000 octets, en-tête 20 octets, MTU 820. Données : 1 980. Capacité : 800. Découpage : 800 + 800 + 380.</div>
+  <table><thead><tr><th>Fragment</th><th>Données</th><th>Taille totale</th><th>Offset</th><th>MF</th></tr></thead><tbody><tr><td>1</td><td>800 octets</td><td>820 octets</td><td>0</td><td>1</td></tr><tr><td>2</td><td>800 octets</td><td>820 octets</td><td>100</td><td>1</td></tr><tr><td>3</td><td>380 octets</td><td>400 octets</td><td>200</td><td>0</td></tr></tbody></table>
+  <p>On transmet 820 + 820 + 400 = <strong>2 040 octets</strong> : les deux en-têtes supplémentaires expliquent les 40 octets ajoutés.</p>
+  <aside class="note"><strong>Pièges.</strong> Offset 100 signifie <strong>800 octets</strong>, pas 100. Ne divise pas directement la taille totale originale par la MTU. Le dernier fragment peut ne pas être multiple de 8. Les routeurs peuvent fragmenter IPv4 ; le réassemblage se fait normalement à destination. Un paquet non fragmenté a lui aussi MF = 0.</aside>
+  <p class="source">Sources : CM 1–2, diapositives 92–112. La MTU 820 apparaît dans le support ; la taille originale de l'exemple ci-dessus est choisie pour expliquer la méthode.</p>
+</section>
+
+<section class="lesson" id="c-dijkstra" data-keywords="Dijkstra Djistra routage graphe poids coût distance prédécesseur chemin minimal sommet" data-group="cours">
+  <h2>8. Dijkstra : trouver le chemin de coût minimal</h2>
+  <p class="lead">Dijkstra calcule les distances minimales depuis une source dans un graphe aux poids positifs ou nuls. Le meilleur chemin minimise la somme des poids, pas forcément le nombre de liens.</p>
+  <h3>Deux informations à conserver</h3>
+  <p>Pour chaque sommet, note une <strong>distance provisoire</strong> depuis la source et un <strong>prédécesseur</strong>. La distance permet de comparer les routes ; le prédécesseur permet de reconstruire le chemin final. Un sommet est « fixé » quand sa plus petite distance a été retenue.</p>
+  <h3>Les étapes à répéter</h3>
+  <ol class="steps"><li>Initialise la source à 0 et tous les autres sommets à ∞.</li><li>Choisis le sommet <strong>non fixé dont la distance provisoire est la plus petite</strong>.</li><li>Pour chacun de ses voisins, calcule la distance candidate : distance du sommet choisi + poids du lien.</li><li>Si elle est plus petite que l'ancienne valeur, remplace la distance et note le nouveau prédécesseur.</li><li>Fixe le sommet choisi et recommence.</li><li>Pour donner une route, remonte les prédécesseurs depuis la destination puis inverse l'ordre.</li></ol>
+  <div class="formula">Distance candidate vers v = distance connue vers u + coût du lien u–v</div>
+  <h3>Exemple pédagogique</h3>
+  <p>Liens : A–B = 2 ; A–C = 5 ; B–C = 1 ; B–D = 4 ; C–D = 1. Source : A.</p>
+  <table><thead><tr><th>Sommet choisi</th><th>B</th><th>C</th><th>D</th></tr></thead><tbody><tr><td>A</td><td>2 via A</td><td>5 via A</td><td>∞</td></tr><tr><td>B</td><td>2 fixé</td><td>3 via B</td><td>6 via B</td></tr><tr><td>C</td><td>2 fixé</td><td>3 fixé</td><td>4 via C</td></tr><tr><td>D</td><td>2 fixé</td><td>3 fixé</td><td>4 fixé</td></tr></tbody></table>
+  <p>Pour D, remonte D ← C ← B ← A : route <strong>A → B → C → D</strong>, coût <strong>2 + 1 + 1 = 4</strong>. Le passage A → B → D coûterait 6.</p>
+  <aside class="note"><strong>Le piège classique.</strong> On ne choisit pas « la plus petite arête du dessin », mais le sommet ayant la plus petite <strong>distance cumulée depuis la source</strong>. Une mise à jour de distance doit aussi mettre à jour le prédécesseur.</aside>
+  <p class="source">Sources : CM 1–2, diapositives 113–114. Le petit graphe chiffré est un exemple pédagogique ajouté.</p>
+</section>
+
+<section class="lesson" id="c-parity" data-keywords="parité paire impaire bidimensionnelle matrice erreur correction FEC ARQ NIC liaison EDC" data-group="cours">
+  <h2>9. Erreurs de bits : parité et correction directe</h2>
+  <p class="lead">Un signal peut être perturbé : le récepteur lit 1 au lieu de 0, ou l'inverse. On ajoute de la redondance pour détecter ces changements et parfois les corriger.</p>
+  <h3>Détecter n'est pas corriger</h3>
+  <p><strong>Détecter</strong> : savoir qu'une erreur s'est probablement produite. <strong>Corriger</strong> : retrouver le bon bit ou les bonnes données. La couche liaison peut faire ce travail entre voisins ; la NIC construit les trames et calcule leurs contrôles. Le bruit et l'atténuation sont deux causes citées dans le cours.</p>
+  <h3>Un seul bit de parité</h3>
+  <p>En <strong>parité paire</strong>, choisis le bit ajouté pour que le nombre total de 1, données et bit de parité compris, soit pair. En <strong>parité impaire</strong>, le total doit être impair.</p>
+  <div class="formula">Parité paire : p = XOR de tous les bits de données<br>Parité impaire : p = complément du XOR</div>
+  <div class="example"><strong>Exemple pédagogique.</strong> <code>101101</code> contient quatre 1. Parité paire : ajoute <strong>0</strong> ; parité impaire : ajoute <strong>1</strong>.</div>
+  <p>Si un nombre <strong>impair</strong> de bits change, la parité change : erreur détectée. Si un nombre <strong>pair</strong> change, le contrôle peut rester conforme. Une parité simple ne permet donc pas de localiser ni corriger une erreur unique.</p>
+  <h3>Parité bidimensionnelle</h3>
+  <p>Répartis les données en lignes et colonnes. Ajoute un bit de parité à chaque ligne et à chaque colonne, avec le bit du coin. Une erreur unique rend fausses exactement la ligne et la colonne correspondantes : leur intersection localise le bit à inverser.</p>
+  <div class="formula">Données = i × j bits<br>Bits de parité = i + j + 1<br>Total transmis = ij + i + j + 1</div>
+  <p>Le schéma du cours détecte et corrige une erreur unique ; il peut détecter deux erreurs mais ne permet pas de les corriger de façon certaine.</p>
+  <h3>FEC et retransmission</h3>
+  <p><strong>FEC</strong> : le récepteur corrige directement grâce à la redondance. <strong>ARQ</strong> : mécanisme fondé sur les accusés de réception et les retransmissions. La FEC peut éviter d'attendre un aller-retour, utile sur une liaison longue ou pour une application en temps réel. Les deux mécanismes peuvent être combinés.</p>
+  <aside class="note"><strong>Attention.</strong> « Parité paire » ne veut pas dire « bit de parité égal à 0 ». Un contrôle conforme signifie <strong>aucune erreur détectée</strong>, pas certitude absolue d'absence d'erreur. ACK et retransmissions sont des services possibles de la liaison, pas une propriété de tous les protocoles.</aside>
+  <p class="source">Sources : CM 3, diapositives 3–23.</p>
+</section>
+
+<section class="lesson" id="c-crc" data-keywords="CRC checksum somme contrôle complément XOR générateur polynôme reste modulo 2 bits division" data-group="cours">
+  <h2>10. Checksum et CRC : recalculer le contrôle</h2>
+  <p class="lead">L'émetteur calcule une valeur de contrôle à partir des données. Le récepteur refait le calcul pour détecter une éventuelle corruption. Checksum et CRC utilisent des calculs différents.</p>
+  <h3>Le checksum Internet</h3>
+  <p>Les données sont découpées en mots de <strong>16 bits</strong>. Ils sont additionnés en complément à 1 ; une retenue sortant des 16 bits est réinjectée à droite. Enfin, on inverse tous les bits pour produire le checksum.</p>
+  <ol class="steps"><li>Découpe les données selon les mots demandés.</li><li>Additionne les mots ; réinjecte une éventuelle retenue.</li><li>Inverse chaque bit : 0 devient 1 et 1 devient 0.</li><li>À réception, additionne aussi le checksum : résultat attendu avant inversion, tous les bits à 1 ; après inversion, tous les bits à 0.</li></ol>
+  <div class="example"><strong>Exemple sans retenue.</strong> <code>0x1234 + 0x1111 = 0x2345</code> → checksum <code>0xDCBA</code>. Vérification : <code>0x2345 + 0xDCBA = 0xFFFF</code>.<br><strong>Avec retenue.</strong> <code>0xFFFF + 0x0001 = 0x10000</code> → <code>0x0000 + 1 = 0x0001</code> → checksum <code>0xFFFE</code>.</div>
+  <p>Le checksum est simple et peu coûteux ; le CRC offre généralement une détection plus forte et convient au calcul matériel en couche liaison.</p>
+  <h3>CRC : uniquement du XOR, sans retenue</h3>
+  <p>On choisit un générateur <strong>G</strong> long de <strong>r + 1 bits</strong>. Le message recevra <strong>r bits</strong> de reste. En arithmétique modulo 2, additionner et soustraire revient à faire XOR : <code>0⊕0=0</code>, <code>0⊕1=1</code>, <code>1⊕0=1</code>, <code>1⊕1=0</code>.</p>
+  <div class="formula">r = longueur de G − 1<br>R = reste de la division modulo 2 de (D suivi de r zéros) par G<br>Message transmis = D suivi des r bits de R</div>
+  <ol class="steps"><li>Compte les bits de G pour déterminer r.</li><li>Ajoute r zéros à droite des données D.</li><li>Aligne le premier 1 de G avec le premier 1 du reste courant et fais un XOR.</li><li>Recommence jusqu'à ce que le reste ait moins de bits que G.</li><li>Écris ce reste sur exactement r bits, avec des zéros au début si nécessaire.</li><li>Remplace les r zéros ajoutés par ce reste. À réception, la division du message complet par G doit avoir un reste nul.</li></ol>
+  <h3>L'exemple du cours, expliqué</h3>
+  <p>D = <code>101110</code>, G = <code>1001</code>. G compte 4 bits, donc r = 3. On divise <code>101110000</code>.</p>
+  <pre class="calculation">101110000 XOR 100100000 = 001010000
+001010000 XOR 001001000 = 000011000
+000011000 XOR 000010010 = 000001010
+000001010 XOR 000001001 = 000000011</pre>
+  <p>Le reste vaut <code>011</code>. Message transmis : <strong><code>101110011</code></strong>. Sa division modulo 2 par <code>1001</code> donne un reste nul.</p>
+  <aside class="note"><strong>Pièges.</strong> r est la longueur de G <strong>moins 1</strong>. Ne fais pas une division décimale ni une soustraction avec emprunt. Un reste nul signifie « aucune erreur détectée ». CRC-32 ajoute 32 bits, mais son polynôme de degré 32 se représente sur 33 bits. Les garanties de détection dépendent du générateur : elles ne sont pas toutes universelles.</aside>
+  <p class="source">Sources : CM 3, diapositives 24–31 ; exemple CRC exact de la diapositive 30. La gestion de la retenue explicite la somme en complément à 1.</p>
+</section>
+
+<section class="lesson" id="c-ethernet" data-keywords="Ethernet trame préambule SFD FCS CRC données padding bourrage MTU VLAN 802.1Q trunk switch broadcast" data-group="cours">
+  <h2>11. Ethernet et VLAN : construire et isoler les trames</h2>
+  <p class="lead">Ethernet définit une trame de couche 2 et des moyens de transmission de couche 1. Les VLAN permettent de séparer plusieurs réseaux locaux logiques sur une même infrastructure.</p>
+  <h3>Les champs d'une trame Ethernet</h3>
+  <table><thead><tr><th>Champ</th><th>Taille</th><th>Utilité</th></tr></thead><tbody>
+    <tr><td>Préambule + SFD</td><td>7 + 1 = 8 octets</td><td>Synchroniser et signaler le début.</td></tr>
+    <tr><td>MAC destination</td><td>6 octets</td><td>Identifier le destinataire sur ce lien.</td></tr>
+    <tr><td>MAC source</td><td>6 octets</td><td>Identifier l'émetteur sur ce lien.</td></tr>
+    <tr><td>Type</td><td>2 octets</td><td>Indiquer le protocole transporté.</td></tr>
+    <tr><td>Données</td><td>46 à 1 500 octets</td><td>Transporter le paquet, avec bourrage si nécessaire.</td></tr>
+    <tr><td>FCS / CRC</td><td>4 octets</td><td>Détecter des erreurs de bits.</td></tr>
+  </tbody></table>
+  <p>La taille minimale du champ de données est de <strong>46 octets</strong>. Si le paquet est plus court, on ajoute du <strong>bourrage</strong> (padding). La couche réseau retrouve la longueur réelle du paquet IP grâce à son champ de longueur.</p>
+  <h3>Calculer sans confondre trame et MTU</h3>
+  <div class="formula">Padding = max(0, 46 − taille du paquet IP)<br>Trame Ethernet sans VLAN = 18 + max(46, taille du paquet IP) octets<br>Ajouter 8 octets si le calcul inclut préambule + SFD</div>
+  <div class="example"><strong>Exemple pédagogique.</strong> Paquet IP de 40 octets → 6 octets de bourrage → trame de <strong>64 octets</strong> hors préambule/SFD, ou 72 avec. Paquet IP de 1 500 octets → trame de <strong>1 518 octets</strong> hors préambule/SFD.</div>
+  <p>La MTU 1 500 limite le <strong>paquet IP</strong>, pas la trame complète. Avant tout calcul, regarde ce que l'énoncé compte : en-tête, FCS, préambule, tag VLAN. L'intervalle entre trames n'est pas un champ de la trame.</p>
+  <h3>Décoder un nom de technologie</h3>
+  <p><code>10BASE-T</code> : 10 Mbit/s, cuivre. <code>100BASE-T</code> : 100 Mbit/s, cuivre. <code>1000BASE-LX</code> : 1 000 Mbit/s = 1 Gbit/s, fibre. <code>10GBASE-T</code> : 10 Gbit/s, cuivre. BASE signifie transmission en bande de base ; le suffixe indique généralement le support ou la variante.</p>
+  <h3>VLAN : des domaines de diffusion séparés</h3>
+  <p>L'administrateur peut affecter les ports d'un switch à différents VLAN. Les hôtes d'un même VLAN communiquent comme dans un LAN commun. Un broadcast envoyé dans VLAN 10 reste dans <strong>VLAN 10</strong> : il ne passe pas aux ports du VLAN 20 simplement parce qu'ils sont sur le même switch.</p>
+  <p><strong>IEEE 802.1Q</strong> ajoute un <strong>tag de 4 octets</strong> contenant notamment l'identifiant du VLAN. Il permet à une liaison entre switches de porter plusieurs VLAN. Pour joindre deux VLAN différents, il faut une <strong>fonction de routage de couche 3</strong>, par exemple un routeur ou un switch couche 3 configuré.</p>
+  <aside class="note"><strong>Pièges.</strong> Même switch physique ne signifie pas même domaine de diffusion. Un VLAN est une séparation logique, pas un câble supplémentaire. La MAC destination est locale au lien ; ne la confonds pas avec l'IP finale. Le support regroupe les 8 octets de préambule/SFD sous le mot « préambule ».</aside>
+  <p class="source">Sources : CM 3, diapositives 33–40, 58–64 et 69–74.</p>
+</section>
+
+<section class="lesson" id="c-access" data-keywords="MAC accès multiple collisions TDM FDM CDMA ALOHA slotted polling canal partagé débit slot probabilite" data-group="cours">
+  <h2>12. Accès au canal : qui a le droit d'émettre ?</h2>
+  <p class="lead">Sur un canal partagé, plusieurs stations peuvent vouloir transmettre en même temps. Le protocole MAC coordonne leurs émissions pour utiliser le canal efficacement.</p>
+  <h3>Le problème des collisions</h3>
+  <p>Si les signaux de plusieurs trames se superposent sur un canal partagé, les récepteurs ne peuvent plus les comprendre : une <strong>collision</strong> gaspille le temps de transmission. Objectifs idéaux du cours : un seul actif profite du débit R ; M actifs se partagent environ R/M chacun ; le mécanisme reste simple et, si possible, décentralisé.</p>
+  <h3>Partitionner : TDM, FDM, CDMA</h3>
+  <table><thead><tr><th>Méthode</th><th>Ce qu'on attribue</th><th>Idée à retenir</th></tr></thead><tbody>
+    <tr><td>TDM</td><td>Un créneau de temps par station.</td><td>Chacun parle à son tour dans le cycle.</td></tr>
+    <tr><td>FDM</td><td>Une bande de fréquences par station.</td><td>Chacun utilise sa partie du spectre.</td></tr>
+    <tr><td>CDMA</td><td>Un code par station.</td><td>Les émissions simultanées peuvent être séparées à l'aide des codes.</td></tr>
+  </tbody></table>
+  <p>Avec N parts fixes égales en TDM/FDM, chaque station dispose d'un débit moyen <strong>R/N</strong>. Cela évite les collisions, mais la part d'une station inactive reste inutilisée. Une station seule n'obtient donc pas automatiquement tout R. En TDM, elle attend aussi son créneau.</p>
+  <h3>Accès aléatoire et Slotted ALOHA</h3>
+  <p>À accès aléatoire, une transmission utilise le débit maximal R. Après collision, les stations attendent indépendamment un délai aléatoire : si elles recommençaient toutes immédiatement, elles risqueraient de recollisionner sans cesse.</p>
+  <p>Dans <strong>Slotted ALOHA</strong>, toutes les trames font L bits. Les stations sont synchronisées et commencent seulement au début d'un créneau. Après une collision, chaque station réessaie à chaque créneau avec une probabilité p, indépendamment des autres.</p>
+  <div class="formula">Durée d'un créneau = L / R<br>L en bits ; R en bit/s ; résultat en secondes</div>
+  <p>Un créneau est <strong>réussi</strong> quand exactement une station émet. Zéro émission = créneau vide ; plusieurs émissions = collision. L'efficacité est la proportion de créneaux réussis. Slotted ALOHA peut exploiter R quand une seule station émet continuellement, mais les créneaux vides et les collisions réduisent son rendement avec plusieurs stations.</p>
+  <h3>Polling : un maître donne la parole</h3>
+  <p>Le maître interroge les stations tour à tour et autorise chacune à envoyer un nombre maximal de trames. Avantage : pas de collisions. Limites : temps d'interrogation et dépendance au maître ; s'il tombe en panne, la coordination s'arrête. Le cours cite Bluetooth comme exemple.</p>
+  <aside class="note"><strong>Pièges.</strong> Pour TDM/FDM fixe, divise par le nombre de <strong>parts réservées</strong>, même si certaines sont inactives. L/R est un temps d'émission, pas un temps de propagation. Un Ethernet commuté avec liens point à point en duplex intégral ne fonctionne pas comme l'ancien Ethernet partagé à collisions.</aside>
+  <details><summary>Ce qui est seulement cité, à compléter après le prochain cours</summary><p>ALOHA non slotté, CSMA, CSMA/CD et CSMA/CA sont énumérés sans méthode détaillée dans les CM disponibles. Les réseaux CAN, de capteurs et les protocoles industriels/SCADA sont annoncés sans développement. Ces notions doivent être complétées avec les nouveaux supports et les consignes du contrôle.</p></details>
+  <p class="source">Sources : CM 3, diapositives 4, 42–57 et 65–68. Thèmes à compléter : CM 1–2, diapositives 2–3 ; CM 3, diapositive 75.</p>
+</section>
+<section class="lesson exercise" id="e-fragmentation" data-group="exercices">
+  <h2>Exercice 1 · Fragmenter un paquet IPv4</h2>
+  <p class="source-note">Énoncé : TD, exercice 1. La solution reprend le corrigé disponible sur Drive et en détaille la méthode. Le TD emploie le mot « trame » ; les champs donnés décrivent bien un <strong>paquet IPv4</strong>.</p>
+  <h3>Énoncé à refaire</h3>
+  <p>On doit transmettre ce paquet sur un réseau dont la MTU vaut <strong>1 500 octets</strong>.</p>
+  <div class="table-wrap"><table><thead><tr><th>Champ</th><th>Taille</th><th>Valeur initiale</th></tr></thead><tbody>
+    <tr><td>Version</td><td>4 bits</td><td>4</td></tr><tr><td>IHL</td><td>4 bits</td><td>5</td></tr>
+    <tr><td>DSCP / ECN</td><td>8 bits</td><td>0</td></tr><tr><td>Total Length</td><td>16 bits</td><td>4 000 octets</td></tr>
+    <tr><td>Identification</td><td>16 bits</td><td>1234</td></tr><tr><td>Flags</td><td>3 bits</td><td>000</td></tr>
+    <tr><td>Fragment Offset</td><td>13 bits</td><td>0</td></tr><tr><td>TTL</td><td>8 bits</td><td>64</td></tr>
+    <tr><td>Protocol</td><td>8 bits</td><td>6 (TCP)</td></tr><tr><td>Header Checksum</td><td>16 bits</td><td>XXXX</td></tr>
+    <tr><td>IP Source</td><td>32 bits</td><td>192.168.1.10</td></tr><tr><td>IP Destination</td><td>32 bits</td><td>192.168.2.20</td></tr>
+    <tr><td>Options</td><td>0 octet</td><td>Aucune</td></tr><tr><td>Payload / données</td><td>3 980 octets</td><td>3 980 octets</td></tr>
+  </tbody></table></div>
+  <ol><li>Quelle est la taille de l'en-tête ?</li><li>Quel est le rôle de chaque champ ?</li><li>Donner les fragments nécessaires : taille des données, longueur totale, offset, MF.</li><li>Quels champs ont changé ?</li></ol>
+  <p class="formula">En-tête H = 4 × IHL &nbsp; · &nbsp; Données D = longueur totale − H<br>Charge maximale non finale P = 8 × ⌊(MTU − H) / 8⌋<br>Offset = nombre d'octets de données déjà transmis / 8</p>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <h3>1. Comprendre les deux tailles</h3>
+    <p>IHL compte des <strong>mots de 32 bits</strong>. Un mot contient 32 / 8 = 4 octets. Donc <strong>H = 5 × 4 = 20 octets</strong>. Les 4 000 octets incluent l'en-tête : <strong>D = 4 000 − 20 = 3 980 octets</strong>.</p>
+    <h3>2. Lire les champs sans les confondre</h3>
+    <div class="table-wrap"><table><thead><tr><th>Champ</th><th>Ce qu'il faut expliquer</th></tr></thead><tbody>
+      <tr><td>Version</td><td>Identifie le format : ici IPv4.</td></tr>
+      <tr><td>IHL</td><td>Indique la longueur de l'en-tête en mots de 4 octets.</td></tr>
+      <tr><td>DSCP / ECN</td><td>DSCP : classe de service (6 bits). ECN : indication de congestion (2 bits).</td></tr>
+      <tr><td>Total Length</td><td>Longueur du paquet en octets, en-tête et données compris.</td></tr>
+      <tr><td>Identification</td><td>Identifiant conservé par tous les fragments de ce datagramme. Avec les adresses et le protocole, il sert au réassemblage.</td></tr>
+      <tr><td>Flags</td><td>Dans l'ordre : réservé, DF, MF. DF = 0 autorise la fragmentation ; MF = 1 signifie que d'autres fragments suivent.</td></tr>
+      <tr><td>Fragment Offset</td><td>Position du fragment dans les données initiales, en blocs de 8 octets.</td></tr>
+      <tr><td>TTL</td><td>Limite la circulation du paquet ; chaque routeur décrémente sa valeur.</td></tr>
+      <tr><td>Protocol</td><td>Identifie le protocole transporté : 6 correspond à TCP.</td></tr>
+      <tr><td>Header Checksum</td><td>Détecte certaines erreurs dans l'en-tête IPv4. Il ne contrôle pas sa charge utile.</td></tr>
+      <tr><td>IP Source / Destination</td><td>Adresses IPv4 de l'émetteur et du destinataire.</td></tr>
+      <tr><td>Options</td><td>Informations facultatives. Il n'y en a pas ici.</td></tr>
+      <tr><td>Données</td><td>Ce que transporte IPv4 ; ici cela inclut l'en-tête TCP et les données TCP.</td></tr>
+    </tbody></table></div>
+    <h3>3. Réserver un en-tête dans chaque fragment</h3>
+    <p>Chaque fragment est lui-même un paquet IPv4. Il doit avoir son propre en-tête de 20 octets. La MTU laisse donc <strong>1 500 − 20 = 1 480 octets</strong> pour ses données.</p>
+    <p>Les données d'un fragment non final doivent contenir un multiple de 8 octets : 1 480 / 8 = 185, qui est entier. La formule avec ⌊ ⌋ (arrondi à l'entier inférieur) donne bien <strong>P = 1 480</strong>.</p>
+    <h3>4. Découper les données puis calculer l'offset</h3>
+    <p><strong>3 980 = 1 480 + 1 480 + 1 020</strong>. Il faut trois fragments. Les positions se mesurent dans les données d'origine, en commençant à zéro.</p>
+    <div class="diagram"><h3>Un paquet, trois fragments</h3><div class="fragment-bars"><div class="fragment-row"><span>Fragment 1</span><div class="fragment-bar"><span class="header">20 o.</span><span class="payload">1 480 octets de données</span></div></div><div class="fragment-row"><span>Fragment 2</span><div class="fragment-bar"><span class="header">20 o.</span><span class="payload">1 480 octets de données</span></div></div><div class="fragment-row"><span>Fragment 3</span><div class="fragment-bar"><span class="header">20 o.</span><span class="payload">1 020 octets de données</span></div></div></div><p class="caption">En-tête de 20 octets dans chaque fragment. Les offsets sont 0, 185 et 370 ; MF vaut 1, 1 et 0. Schéma explicatif des données du TD, longueurs dessinées de façon indicative.</p></div>
+    <div class="table-wrap"><table><thead><tr><th>Fragment</th><th>Données</th><th>Total IPv4</th><th>Octets initiaux</th><th>Offset</th><th>MF</th><th>Flags complets</th></tr></thead><tbody>
+      <tr><td>1</td><td>1 480 o.</td><td>1 500 o.</td><td>0 à 1 479</td><td>0 / 8 = 0</td><td>1</td><td>001</td></tr>
+      <tr><td>2</td><td>1 480 o.</td><td>1 500 o.</td><td>1 480 à 2 959</td><td>1 480 / 8 = 185</td><td>1</td><td>001</td></tr>
+      <tr><td>3</td><td>1 020 o.</td><td>1 040 o.</td><td>2 960 à 3 979</td><td>2 960 / 8 = 370</td><td>0</td><td>000</td></tr>
+    </tbody></table></div>
+    <p>MF vaut 1 tant qu'il reste des données après ce fragment. Le dernier a MF = 0. Ses 1 020 octets n'ont pas besoin d'être un multiple de 8.</p>
+    <h3>5. Dire ce qui change</h3>
+    <p><strong>Total Length, MF, Fragment Offset et le checksum d'en-tête</strong> changent. Les données sont réparties. Version, IHL, DSCP/ECN, identification (1234), protocole et IP source/destination restent identiques dans cet exercice sans options.</p>
+    <p>Le TTL baisse également si un routeur transmet les fragments, par exemple de 64 à 63 après un saut. Cette baisse vient du routage ; elle n'est pas une conséquence du seul découpage. On ne copie pas l'en-tête TCP dans chaque fragment : on répartit toute la charge utile IP.</p>
+    <p class="check">Contrôle rapide : 1 480 + 1 480 + 1 020 = 3 980 et chaque longueur totale ≤ 1 500. Trois en-têtes au lieu d'un ajoutent 40 octets : 3 980 + 3 × 20 = 4 040 octets transmis au niveau IPv4.</p>
+    <p class="pitfall"><strong>Piège :</strong> l'offset n'est ni le numéro du fragment ni sa position exprimée directement en octets. Un offset de 185 signifie « mes données commencent à l'octet 1 480 ».</p>
+  </details>
+  <div class="training"><h3>Variante d'entraînement</h3><p>Ajout pédagogique, déjà présent dans le corrigé Drive : paquet IPv4 de 2 000 octets, sans options, DF = 0, MTU = 1 000. Refaire le tableau des fragments.</p>
+    <details class="solution"><summary>Voir la réponse de la variante</summary><p>H = 20 ; D = 1 980 ; P = 8 × ⌊980/8⌋ = 976. On obtient 976 + 976 + 28 octets de données.</p>
+    <div class="table-wrap"><table><thead><tr><th>Fragment</th><th>Données</th><th>Total</th><th>Offset</th><th>MF</th></tr></thead><tbody><tr><td>1</td><td>976</td><td>996</td><td>0</td><td>1</td></tr><tr><td>2</td><td>976</td><td>996</td><td>122</td><td>1</td></tr><tr><td>3</td><td>28</td><td>48</td><td>244</td><td>0</td></tr></tbody></table></div>
+    <p>On laisse 4 octets inutilisés dans les deux premiers paquets pour conserver un multiple de 8 dans leurs données.</p></details>
+  </div>
+</section>
+
+<section class="lesson exercise" id="e-checksum" data-group="exercices">
+  <h2>Exercice 2A · Calculer un checksum</h2>
+  <p class="source-note">Énoncé : TD, exercice 2, partie 1. Résultat et étapes vérifiés à partir du corrigé Drive.</p>
+  <h3>Énoncé à refaire</h3>
+  <p>Calculer le checksum sur 16 bits, puis donner la suite de mots envoyée. Expliquer comment le récepteur vérifie les données. Si la somme dépasse 16 bits, ajouter le dépassement à la partie basse.</p>
+  <div class="table-wrap"><table><thead><tr><th>Donnée</th><th>Binaire</th><th>Hexadécimal</th></tr></thead><tbody>
+    <tr><td>D1</td><td><code>0001 0010 0011 0100</code></td><td><code>0x1234</code></td></tr>
+    <tr><td>D2</td><td><code>0101 0110 0111 1000</code></td><td><code>0x5678</code></td></tr>
+    <tr><td>D3</td><td><code>1001 1010 1011 1100</code></td><td><code>0x9ABC</code></td></tr>
+    <tr><td>D4</td><td><code>0001 0001 0010 0011</code></td><td><code>0x1123</code></td></tr>
+  </tbody></table></div>
+  <p class="formula">Additionner les mots → reporter les retenues au-delà de 16 bits → inverser les 16 bits<br>Checksum = 0xFFFF − somme repliée<br>Réception : somme repliée des données + checksum = 0xFFFF</p>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <h3>1. Comprendre l'addition en base 16</h3>
+    <p>En hexadécimal, A = 10, B = 11, C = 12, D = 13, E = 14 et F = 15. Un chiffre vaut 4 bits. Un mot de 16 bits s'écrit donc avec quatre chiffres. Le préfixe <code>0x</code> indique la base 16.</p>
+    <pre><code>   1234
++  5678
+-------
+   68AC</code></pre>
+    <p>De droite à gauche : 4 + 8 = 12 → C ; 3 + 7 = 10 → A ; 2 + 6 = 8 ; 1 + 5 = 6. On obtient <strong>0x68AC</strong>.</p>
+    <h3>2. Ajouter le troisième mot avec des retenues</h3>
+    <pre><code>   68AC
++  9ABC
+-------
+  10368</code></pre>
+    <div class="table-wrap"><table><thead><tr><th>De droite à gauche</th><th>Calcul en décimal</th><th>Chiffre écrit</th><th>Retenue</th></tr></thead><tbody>
+      <tr><td>C + C</td><td>12 + 12 = 24 = 16 + 8</td><td>8</td><td>1</td></tr>
+      <tr><td>A + B + 1</td><td>10 + 11 + 1 = 22 = 16 + 6</td><td>6</td><td>1</td></tr>
+      <tr><td>8 + A + 1</td><td>8 + 10 + 1 = 19 = 16 + 3</td><td>3</td><td>1</td></tr>
+      <tr><td>6 + 9 + 1</td><td>6 + 9 + 1 = 16</td><td>0</td><td>1 à gauche</td></tr>
+    </tbody></table></div>
+    <h3>3. Faire le report circulaire</h3>
+    <p><code>0x10368</code> contient cinq chiffres. On conserve les quatre chiffres de droite, <code>0x0368</code>, puis on ajoute le dépassement <code>0x0001</code> : <strong>0x0368 + 0x0001 = 0x0369</strong>. Si cela déborde encore, on recommence le report.</p>
+    <h3>4. Ajouter D4</h3>
+    <pre><code>   0369
++  1123
+-------
+   148C</code></pre>
+    <p>La somme repliée des quatre mots vaut <strong>0x148C</strong>. C'est une somme intermédiaire, pas encore le checksum.</p>
+    <h3>5. Inverser les bits : le complément à un</h3>
+    <pre><code>Somme    : 0001 0100 1000 1100 = 0x148C
+Checksum : 1110 1011 0111 0011 = 0xEB73</code></pre>
+    <p>Pour chaque chiffre, prendre son complément à F : F − 1 = E ; F − 4 = B ; F − 8 = 7 ; F − C = 3. On peut aussi calculer <code>0xFFFF − 0x148C = 0xEB73</code>.</p>
+    <p class="answer"><strong>Suite envoyée : <code>1234 | 5678 | 9ABC | 1123 | EB73</code></strong>, soit 5 mots de 16 bits = 80 bits. Cette représentation répond au TD ; une vraie trame Ethernet comporte d'autres champs.</p>
+    <h3>6. Vérifier à la réception</h3>
+    <p>Le récepteur additionne les quatre données <strong>et le checksum reçu</strong>, avec le même report circulaire. Il attend <strong>0xFFFF</strong>. Ici : <code>0x148C + 0xEB73 = 0xFFFF</code>. S'il inverse ensuite cette somme, il trouve 0x0000.</p>
+    <p class="pitfall"><strong>Pièges :</strong> ne pas jeter le dépassement, ne pas ajouter 1 après l'inversion, ne pas employer le XOR à la place de l'addition. Un contrôle correct signifie « aucune erreur détectée », pas « aucune erreur possible ».</p>
+  </details>
+  <div class="training"><h3>Variante d'entraînement</h3><p>Ajout pédagogique, déjà présent dans le corrigé Drive : calculer le checksum de <code>0xFFFF</code> et <code>0x0002</code>.</p><details class="solution"><summary>Voir la réponse de la variante</summary><p><code>FFFF + 0002 = 10001</code>. Report : <code>0001 + 1 = 0002</code>. Inversion : <strong>FFFD</strong>. Vérification : <code>0002 + FFFD = FFFF</code>.</p></details></div>
+</section>
+
+<section class="lesson exercise" id="e-crc" data-group="exercices">
+  <h2>Exercice 2B · Calculer un CRC avec des XOR</h2>
+  <p class="source-note">Énoncé : TD, exercice 2, partie 2. Division et résultat déjà présents dans le corrigé Drive, recalculés ici.</p>
+  <h3>Énoncé à refaire</h3>
+  <p>Données <strong><code>D = 1101011011</code></strong> (10 bits). Générateur <strong><code>G = 10011</code></strong> (5 bits). Donc <strong>r = 4</strong>.</p>
+  <ol><li>Rappeler la méthode de calcul du reste R.</li><li>Calculer R et donner la trame envoyée.</li><li>Expliquer le contrôle réalisé par le récepteur.</li></ol>
+  <p class="formula">r = nombre de bits de G − 1<br>R = reste de la division de D suivi de r zéros par G, avec des XOR<br>Trame T = D suivi de R &nbsp; · &nbsp; Réception : T divisé par G doit donner un reste nul</p>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+  <div class="diagram"><h3>La chaîne du calcul CRC</h3><div class="grid-two"><div><span class="pill">Émetteur</span><p><code>D + 0000</code></p><p>Division XOR par <code>10011</code></p><p>Reste <code>1110</code></p><p>Envoi <code>D + 1110</code></p></div><div><span class="pill">Récepteur</span><p><code>11010110111110</code></p><p>Division XOR par le même G</p><p>Reste attendu : <code>0000</code></p><p>Aucune erreur détectée</p></div></div><p class="caption">On ajoute des zéros seulement au calcul de l’émetteur. La division utilise XOR, sans retenue.</p></div>
+    <h3>1. Comprendre le XOR</h3>
+    <p>Le XOR compare deux bits : ils sont identiques → 0 ; ils sont différents → 1. Il n'y a <strong>ni retenue ni emprunt</strong>.</p>
+    <div class="table-wrap"><table><thead><tr><th>Bit 1</th><th>Bit 2</th><th>XOR</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td></tr></tbody></table></div>
+    <p>Exemple : <code>1101 XOR 1001 = 0100</code>. Le générateur <code>10011</code> représente le polynôme x⁴ + x + 1 : son degré est 4.</p>
+    <h3>2. Réserver quatre bits pour le CRC</h3>
+    <p>On ajoute <strong>r = 4 zéros</strong> à droite de D, uniquement pour le calcul : <code>1101011011</code> devient <strong><code>11010110110000</code></strong>. Cette suite a 14 bits.</p>
+    <h3>3. Diviser : annuler le premier 1 encore présent</h3>
+    <p>À chaque étape, aligner le premier 1 de <code>10011</code> sous le premier 1 du reste courant, puis faire le XOR. Les zéros à droite de G servent simplement à matérialiser cet alignement.</p>
+    <pre><code>  11010110110000
+⊕ 10011000000000
+  --------------
+  01001110110000
+⊕ 01001100000000
+  --------------
+  00000010110000
+⊕ 00000010011000
+  --------------
+  00000000101000
+⊕ 00000000100110
+  --------------
+  00000000001110</code></pre>
+    <p>On s'arrête : les bits significatifs restants sont <code>1110</code>, moins de 5 bits. On conserve exactement quatre bits pour le CRC, y compris les éventuels zéros à gauche. Le quotient est <code>1100001010</code>, mais c'est le <strong>reste R = 1110</strong> qui est envoyé.</p>
+    <h3>4. Former la trame</h3>
+    <p>Remplacer les quatre zéros réservés par R : <strong><code>T = 1101011011 | 1110 = 11010110111110</code></strong>.</p>
+    <h3>5. Contrôler à la réception</h3>
+    <p>Le récepteur divise la <strong>trame reçue complète</strong> par le même générateur <code>10011</code>. Il ne rajoute pas quatre zéros :</p>
+    <pre><code>11010110111110
+→ 01001110111110
+→ 00000010111110
+→ 00000000100110
+→ 00000000000000</code></pre>
+    <p>Reste <strong>0000</strong> : aucune erreur détectée. Reste non nul : erreur détectée. Si le dernier bit de cette trame passe de 0 à 1, le reste devient <strong>0001</strong>.</p>
+    <p class="pitfall"><strong>Pièges :</strong> ajouter 4 zéros, pas 5 ; faire des XOR, pas des soustractions avec emprunts ; envoyer le reste, pas le quotient ; ne pas ajouter de zéros au contrôle. Certaines erreurs correspondant à un multiple du générateur ne sont pas détectées.</p>
+  </details>
+  <div class="training"><h3>Variante d'entraînement</h3><p>Nouvel exemple pédagogique pour s'entraîner : <code>D = 101101</code> et <code>G = 1011</code>. Calculer le CRC et la trame.</p><details class="solution"><summary>Voir la réponse de la variante</summary><p>G a 4 bits, donc r = 3. Diviser <code>101101000</code> :</p><pre><code>  101101000
+⊕ 101100000
+  ---------
+  000001000
+⊕ 000001011
+  ---------
+  000000011</code></pre><p><strong>R = 011</strong> ; trame <strong>101101011</strong>. À la réception, le reste de cette trame divisé par 1011 vaut 000.</p></details></div>
+</section>
+
+<section class="lesson exercise" id="e-aloha" data-group="exercices">
+  <h2>Exercice 3 · Maximiser Slotted ALOHA</h2>
+  <p class="source-note">Énoncé : TD, exercice 3. Démonstration reprise et explicitée depuis le corrigé Drive.</p>
+  <h3>Énoncé à refaire</h3>
+  <ol><li>Rappeler le fonctionnement de Slotted ALOHA.</li><li>Avec N nœuds actifs, l'efficacité vaut <code>S(p) = Np(1 − p)^(N − 1)</code>. Trouver la valeur de p qui maximise S.</li><li>En utilisant cette valeur, calculer la limite de l'efficacité quand N tend vers l'infini. Indication : <code>(1 − 1/N)^N → 1/e</code>.</li></ol>
+  <p><strong>p</strong> est la probabilité qu'<em>une station active</em> décide d'émettre pendant un créneau. Ce n'est pas la probabilité de succès du réseau.</p>
+  <p class="formula">S(p) = Np(1 − p)<sup>N − 1</sup><br>p optimal = 1/N<br>S maximal = (1 − 1/N)<sup>N − 1</sup> → 1/e ≈ 36,8 %</p>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <h3>a. Comprendre les créneaux</h3>
+    <p>Les stations partagent un canal. Le temps est découpé en créneaux synchronisés, chacun assez long pour un paquet. Une station commence uniquement au début d'un créneau. Chaque station active choisit indépendamment d'émettre avec probabilité p.</p>
+    <div class="table-wrap"><table><thead><tr><th>Stations qui émettent</th><th>Résultat du créneau</th></tr></thead><tbody><tr><td>0</td><td>Créneau vide</td></tr><tr><td>1</td><td>Succès : un paquet livré</td></tr><tr><td>2 ou plus</td><td>Collision : aucun paquet livré dans ce modèle</td></tr></tbody></table></div>
+    <p>Après une collision, les stations retentent plus tard de façon aléatoire. Pour qu'une station précise réussisse, elle doit émettre (p) et les N − 1 autres doivent se taire ((1 − p)<sup>N − 1</sup>). Il y a N stations possibles pour le succès, d'où <strong>S(p) = Np(1 − p)<sup>N − 1</sup></strong>.</p>
+    <h3>b. Trouver le maximum par la dérivée</h3>
+    <p>Pour N ≥ 2, dériver le produit <code>p × (1 − p)^(N − 1)</code>. La dérivée de p vaut 1 ; celle de <code>(1 − p)^(N − 1)</code> vaut <code>−(N − 1)(1 − p)^(N − 2)</code>.</p>
+    <pre><code>S′(p) = N[(1 − p)^(N − 1) − p(N − 1)(1 − p)^(N − 2)]
+      = N(1 − p)^(N − 2)[(1 − p) − p(N − 1)]
+      = N(1 − p)^(N − 2)(1 − Np)</code></pre>
+    <p>Pour 0 &lt; p &lt; 1, le facteur <code>N(1 − p)^(N − 2)</code> est positif. Le signe vient donc de <code>1 − Np</code> : positif avant 1/N, nul à 1/N, négatif après. S monte puis descend : <strong>p = 1/N est le maximum</strong>. Aux bords p = 0 et p = 1, S = 0 pour N ≥ 2.</p>
+    <p>Cas simple N = 1 : une seule station, donc aucune collision et S(p) = p. Le maximum est p = 1, ce qui reste cohérent avec 1/N.</p>
+    <h3>c. Calculer l'efficacité maximale et sa limite</h3>
+    <pre><code>Smax = N × (1/N) × (1 − 1/N)^(N − 1)
+     = (1 − 1/N)^(N − 1)
+     = (1 − 1/N)^N / (1 − 1/N)</code></pre>
+    <p>Le numérateur tend vers 1/e et le dénominateur vers 1. Donc <strong>Smax → 1/e ≈ 0,367879 ≈ 36,8 %</strong>. Cela signifie qu'environ 36,8 % des créneaux réussissent quand il y a beaucoup de stations et que p est bien réglé.</p>
+    <div class="table-wrap"><table><thead><tr><th>N</th><th>p optimal</th><th>S maximal</th></tr></thead><tbody><tr><td>2</td><td>0,5</td><td>50 %</td></tr><tr><td>10</td><td>0,1</td><td>38,742 %</td></tr><tr><td>20</td><td>0,05</td><td>37,735 %</td></tr><tr><td>100</td><td>0,01</td><td>36,973 %</td></tr><tr><td>N très grand</td><td>1/N</td><td>Environ 36,8 %</td></tr></tbody></table></div>
+    <p class="pitfall"><strong>Pièges :</strong> confondre p et S ; oublier le facteur N ; écrire un exposant N à la place de N − 1 dans S ; annoncer 36,8 % pour tout N au lieu de parler d'une limite.</p>
+  </details>
+  <div class="training"><h3>Variante d'entraînement</h3><p>Avec 20 stations, donner p optimal, puis calculer l'efficacité maximale.</p><details class="solution"><summary>Voir la réponse de la variante</summary><p><strong>p = 1/20 = 0,05</strong>. Chaque station tente sa chance dans 5 % des créneaux. <strong>Smax = 0,95¹⁹ ≈ 0,377354 = 37,735 %</strong> : ce sont les créneaux réussis par l'ensemble du réseau.</p></details></div>
+</section>
+
+<section class="lesson exercise" id="e-vlan" data-group="exercices">
+  <h2>Exercice 4 · VLAN, trunk et routage</h2>
+  <p class="source-note">Énoncé : TD, exercice 4, sept parties et synthèse. Les réponses reprennent le corrigé Drive. L'exemple d'adressage IP ci-dessous est pédagogique ; l'énoncé ne donne pas d'IP aux PC.</p>
+  <h3>Architecture donnée</h3>
+  <p>Deux départements : <strong>EE (Électronique), 20 employés</strong> et <strong>CS (Informatique), 30 employés</strong>. Deux bâtiments, chacun avec un switch administrable de 8 ports : S1 et S2. Les ports 8 relient les switches. On veut isoler les broadcasts, permettre les échanges dans chaque département, autoriser des échanges entre départements lorsque nécessaire et déplacer logiquement un utilisateur sans recâbler.</p>
+  <p><strong>VLAN 10 = EE ; VLAN 20 = CS.</strong></p>
+  <div class="table-wrap"><table><thead><tr><th>Switch</th><th>Port</th><th>PC</th><th>Département</th></tr></thead><tbody>
+    <tr><td>S1</td><td>1</td><td>PC1</td><td>EE</td></tr><tr><td>S1</td><td>2</td><td>PC2</td><td>EE</td></tr><tr><td>S1</td><td>3</td><td>PC3</td><td>EE</td></tr>
+    <tr><td>S1</td><td>4</td><td>PC4</td><td>CS</td></tr><tr><td>S1</td><td>5</td><td>PC5</td><td>CS</td></tr><tr><td>S1</td><td>6</td><td>PC6</td><td>CS</td></tr>
+    <tr><td>S2</td><td>1</td><td>PC7</td><td>EE</td></tr><tr><td>S2</td><td>2</td><td>PC8</td><td>EE</td></tr>
+    <tr><td>S2</td><td>3</td><td>PC9</td><td>CS</td></tr><tr><td>S2</td><td>4</td><td>PC10</td><td>CS</td></tr><tr><td>S2</td><td>5</td><td>PC11</td><td>CS</td></tr>
+  </tbody></table></div>
+  <div class="diagram" id="vlan-diagram"><h3>Les mêmes VLAN dans deux bâtiments</h3><svg class="diagram-svg" viewBox="0 0 740 350" role="img" aria-label="Deux switches reliés par un trunk transportent les VLAN 10 et 20 ; le routeur relie les VLAN"><g stroke-width="3" fill="none"><path class="vlan-ee" d="M175 75V143M565 75V143" stroke="#225ce0"/><path class="vlan-cs" d="M175 210V280M565 210V280" stroke="#05a6b9"/><path class="vlan-trunk" d="M250 175H490" stroke="#526479"/><path class="vlan-routing" d="M250 175L330 270" stroke="#bd7b14" stroke-dasharray="7 5"/></g><g stroke="#9fb5d1" fill="#fff" stroke-width="2"><rect x="30" y="18" width="290" height="63" rx="9"/><rect x="420" y="18" width="290" height="63" rx="9"/><rect x="100" y="140" width="150" height="70" rx="9"/><rect x="490" y="140" width="150" height="70" rx="9"/><rect x="30" y="275" width="255" height="63" rx="9"/><rect x="455" y="275" width="255" height="63" rx="9"/><rect x="296" y="250" width="148" height="70" rx="9"/></g><g font-size="16" text-anchor="middle" fill="#10213b"><text x="175" y="44" fill="#225ce0" font-weight="700">VLAN 10 · EE</text><text x="175" y="67">PC1, PC2, PC3</text><text x="565" y="44" fill="#225ce0" font-weight="700">VLAN 10 · EE</text><text x="565" y="67">PC7, PC8</text><text x="175" y="168" font-weight="700">S1 · Bâtiment 1</text><text x="175" y="192" font-size="14">Port 8 : trunk</text><text x="565" y="168" font-weight="700">S2 · Bâtiment 2</text><text x="565" y="192" font-size="14">Port 8 : trunk</text><text x="370" y="154" font-size="14">802.1Q · VLAN 10 & 20</text><text x="157" y="300" fill="#057786" font-weight="700">VLAN 20 · CS</text><text x="157" y="324">PC4, PC5, PC6</text><text x="582" y="300" fill="#057786" font-weight="700">VLAN 20 · CS</text><text x="582" y="324">PC9, PC10, PC11</text><text x="370" y="278" font-weight="700">Routeur</text><text x="370" y="302" font-size="14">Pour l’inter-VLAN</text></g></svg><div class="button-row"><button class="small-button" data-vlan-action="broadcast">Broadcast de PC1</button><button class="small-button secondary" data-vlan-action="route">PC1 vers PC4</button></div><p class="vlan-explain" aria-live="polite">Le trunk conserve l’identité des VLAN entre S1 et S2. Le routeur est un ajout nécessaire si l’on veut faire communiquer les deux VLAN.</p></div>
+  <h3>Partie 1 · VLAN et domaines de broadcast</h3>
+  <ol><li>Qu'est-ce qu'un VLAN ?</li><li>Pourquoi créer deux VLAN ?</li><li>Dans quels VLAN placer S1/1, S1/4, S2/2 et S2/5 ?</li><li>Quels PC reçoivent le broadcast de PC1 ?</li><li>PC1 et PC3 ont-ils le même domaine de broadcast ?</li><li>PC1 et PC4 peuvent-ils communiquer directement au niveau 2 ?</li></ol>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <p><strong>1.</strong> Un VLAN est un réseau local virtuel : un groupe logique de ports et de machines formant un domaine de broadcast de niveau 2, même si ses membres utilisent plusieurs switches.</p>
+    <p><strong>2.</strong> Deux VLAN séparent les diffusions EE et CS et permettent de contrôler les échanges entre départements. On peut utiliser les mêmes switches et câbles tout en séparant les groupes.</p>
+    <p><strong>3.</strong> S1/1 → VLAN 10 ; S1/4 → VLAN 20 ; S2/2 → VLAN 10 ; S2/5 → VLAN 20.</p>
+    <p><strong>4.</strong> Un broadcast de PC1 est transmis à <strong>PC2, PC3, PC7 et PC8</strong>. PC1 est l'émetteur ; la trame n'est pas renvoyée sur son port d'entrée. Les machines CS ne la reçoivent pas.</p>
+    <p><strong>5.</strong> Oui : PC1 et PC3 appartiennent au VLAN 10. <strong>6.</strong> Non : PC1 est dans le VLAN 10 et PC4 dans le VLAN 20. Il faut du routage pour communiquer entre les VLAN.</p>
+  </details>
+  <h3>Partie 2 · Configurer les ports</h3>
+  <ol><li>Compléter le tableau port → VLAN pour les 11 PC.</li><li>Quel est le rôle de cette table ?</li><li>Si PC4 passe de CS à EE, faut-il recâbler ? Quelle modification faire ?</li></ol>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <div class="table-wrap"><table><thead><tr><th>Switch</th><th>Ports</th><th>PC</th><th>VLAN</th><th>Mode</th></tr></thead><tbody><tr><td>S1</td><td>1, 2, 3</td><td>PC1, PC2, PC3</td><td>10</td><td>Access</td></tr><tr><td>S1</td><td>4, 5, 6</td><td>PC4, PC5, PC6</td><td>20</td><td>Access</td></tr><tr><td>S2</td><td>1, 2</td><td>PC7, PC8</td><td>10</td><td>Access</td></tr><tr><td>S2</td><td>3, 4, 5</td><td>PC9, PC10, PC11</td><td>20</td><td>Access</td></tr><tr><td>S1 et S2</td><td>8</td><td>Liaison entre switches</td><td>10 et 20</td><td>Trunk</td></tr></tbody></table></div>
+    <p><strong>2.</strong> La table donne le VLAN de chaque port access. Une trame sans tag reçue d'un PC prend le VLAN de son port ; ses sorties sont limitées à ce VLAN. La recherche MAC tient aussi compte du VLAN.</p>
+    <p><strong>3a.</strong> PC4 reste connecté sur S1/4 : <strong>aucun recâblage</strong>. <strong>3b.</strong> Changer l'affectation de S1/4 du VLAN 20 au VLAN 10. Pour que l'IP fonctionne si les VLAN ont des sous-réseaux différents, adapter aussi l'IP, le masque et la passerelle de PC4, manuellement ou par DHCP.</p>
+  </details>
+  <h3>Partie 3 · Relier les deux switches</h3>
+  <p>Première idée : un câble distinct pour chaque VLAN.</p>
+  <ol><li>Combien de ports faut-il pour N VLAN ?</li><li>Pourquoi cela devient-il peu pratique ?</li><li>Quelle solution transporte plusieurs VLAN sur une liaison ?</li><li>Quel mode de port employer ?</li></ol>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <p><strong>1.</strong> N câbles utilisent N ports sur chaque switch, soit <strong>2N ports au total</strong>. Pour deux VLAN : deux câbles et quatre ports.</p><p><strong>2.</strong> Le nombre de câbles et de ports augmente avec les VLAN. <strong>3.</strong> Utiliser une seule liaison <strong>trunk</strong>. <strong>4.</strong> Configurer les deux extrémités S1/8 et S2/8 en mode trunk et autoriser les VLAN 10 et 20.</p>
+  </details>
+  <h3>Partie 4 · Comprendre le trunk</h3>
+  <ol><li>Qu'est-ce qu'un trunk ?</li><li>Quels VLAN passent sur S1/8–S2/8 ?</li><li>Quelle différence entre access et trunk ?</li><li>Comment S2 reconnaît-il le VLAN 10 d'une trame issue de PC1 ?</li><li>Quel standard IEEE identifie les VLAN sur le trunk ?</li><li>Quel est le rôle du tag ?</li></ol>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <p><strong>1–2.</strong> Un trunk est une liaison qui transporte plusieurs VLAN : ici, <strong>10 et 20</strong>.</p>
+    <div class="table-wrap"><table><thead><tr><th></th><th>Access</th><th>Trunk</th></tr></thead><tbody><tr><td>Dans le TD</td><td>Relie un PC</td><td>Relie S1 à S2</td></tr><tr><td>VLAN de données</td><td>Un</td><td>Plusieurs autorisés</td></tr><tr><td>Trames sur le câble</td><td>Sans tag côté PC</td><td>Avec tag pour les VLAN 10 et 20</td></tr></tbody></table></div>
+    <p><strong>4.</strong> S1 reçoit la trame non étiquetée sur S1/1, associé au VLAN 10. Avant de l'envoyer sur le trunk, il ajoute un tag qui indique VLAN 10. S2 lit ce numéro et transmet uniquement dans ce VLAN ; il retire le tag en sortant vers un PC sur un port access.</p>
+    <p><strong>5.</strong> Le standard est <strong>IEEE 802.1Q</strong>. <strong>6.</strong> Le tag conserve l'identité du VLAN sur la liaison commune ; il contient aussi une priorité. Il ne chiffre pas les données et ne route pas entre VLAN.</p>
+    <p>Selon la configuration, un VLAN natif peut circuler sans tag sur un trunk. Dans l'explication du TD, les VLAN 10 et 20 sont étiquetés.</p>
+  </details>
+  <h3>Partie 5 · Lire le tag IEEE 802.1Q</h3>
+  <ol><li>Combien d'octets ajoute le tag ?</li><li>À quoi sert le TPID ?</li><li>Combien de bits contient le VLAN Identifier ?</li><li>Quelle est la valeur hexadécimale du TPID ?</li><li>Que fait le switch récepteur du tag ?</li></ol>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <p><strong>1.</strong> Le tag ajoute <strong>4 octets = 32 bits</strong>, entre la MAC source et l'EtherType d'origine. Le contrôle Ethernet FCS est recalculé.</p>
+    <pre><code>MAC destination | MAC source | TPID | TCI | EtherType | Données | FCS
+     6 o.           6 o.       2 o.  2 o.     2 o.</code></pre>
+    <div class="table-wrap"><table><thead><tr><th>Champ</th><th>Taille</th><th>Rôle</th></tr></thead><tbody><tr><td>TPID</td><td>16 bits</td><td>Annonce la présence du tag ; valeur classique 0x8100.</td></tr><tr><td>PCP</td><td>3 bits</td><td>Priorité de 0 à 7.</td></tr><tr><td>DEI</td><td>1 bit</td><td>Éligibilité à l'abandon en cas de congestion.</td></tr><tr><td>VID</td><td>12 bits</td><td>Numéro du VLAN.</td></tr></tbody></table></div>
+    <p><strong>2.</strong> TPID signifie <em>Tag Protocol Identifier</em> : il annonce que les deux octets suivants forment le TCI. <strong>3.</strong> VID = 12 bits, soit 2¹² = 4 096 combinaisons. Les VLAN usuels vont de 1 à 4094 ; 0 a une signification de priorité et 4095 est réservé. <strong>4.</strong> Réponse attendue : <strong>0x8100</strong>. PCP + DEI + VID forment le TCI : 3 + 1 + 12 = 16 bits.</p>
+    <p><strong>5.</strong> S2 lit le VID, vérifie que le VLAN est autorisé, puis transmet dans ce VLAN. Il enlève le tag sur un port access ; sur un autre trunk, il conserve ou remet le tag adapté à la configuration.</p>
+    <p>Exemple pédagogique avec priorité PCP = 0 et DEI = 0 : VLAN 10 → tag <code>81 00 00 0A</code> ; VLAN 20 → tag <code>81 00 00 14</code>.</p>
+  </details>
+  <h3>Partie 6 · Faire communiquer deux VLAN</h3>
+  <ol><li>PC1 (VLAN 10) peut-il joindre directement PC4 (VLAN 20) au niveau 2 ?</li><li>Quel équipement faut-il ajouter ?</li><li>Décrire le trajet d'un paquet IP de PC1 à PC4.</li><li>Pourquoi parle-t-on de routage inter-VLAN ?</li><li>Différence entre un échange dans le même VLAN et entre deux VLAN ?</li></ol>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <p><strong>1.</strong> Non : leurs domaines de niveau 2 sont séparés. <strong>2.</strong> Ajouter un <strong>routeur</strong> avec une interface ou sous-interface par VLAN, ou un <strong>switch de niveau 3</strong> avec une interface virtuelle SVI par VLAN. Il faut activer le routage et configurer les passerelles des PC.</p>
+    <h3>3. Suivre le paquet avec un adressage d'exemple</h3>
+    <p class="source-note">Cet adressage figure comme exemple dans le corrigé Drive ; il n'est pas imposé par le TD. /24 correspond au masque 255.255.255.0.</p>
+    <div class="table-wrap"><table><thead><tr><th>Équipement</th><th>VLAN</th><th>IP et masque</th><th>Passerelle</th></tr></thead><tbody><tr><td>PC1</td><td>10</td><td>192.168.10.11/24</td><td>192.168.10.1</td></tr><tr><td>Interface routeur EE</td><td>10</td><td>192.168.10.1/24</td><td>—</td></tr><tr><td>PC4</td><td>20</td><td>192.168.20.14/24</td><td>192.168.20.1</td></tr><tr><td>Interface routeur CS</td><td>20</td><td>192.168.20.1/24</td><td>—</td></tr></tbody></table></div>
+    <ol><li>PC1 compare l'IP destination à son réseau. PC4 est dans un autre sous-réseau : PC1 choisit sa passerelle 192.168.10.1. Il apprend sa MAC par ARP si nécessaire.</li><li>PC1 envoie une trame à la <strong>MAC de la passerelle</strong> dans le VLAN 10. À l'intérieur, le paquet IP est bien destiné à <strong>l'IP de PC4</strong>.</li><li>Le routeur retire l'enveloppe Ethernet, consulte sa table de routage, choisit l'interface VLAN 20, diminue le TTL et recalcule le checksum IPv4. Il apprend la MAC de PC4 par ARP si nécessaire.</li><li>Le routeur construit une <strong>nouvelle trame</strong> à destination de la MAC de PC4 dans le VLAN 20. Le switch la transmet vers S1/4 sans tag côté PC4. Le retour passe par la passerelle de PC4.</li></ol>
+    <p>Un montage possible est un routeur relié en trunk à S1/7 avec deux sous-interfaces : c'est le principe <em>router-on-a-stick</em>.</p>
+    <p><strong>4.</strong> On traverse deux VLAN et deux sous-réseaux : une décision de routage est nécessaire. <strong>5.</strong> Même VLAN et même sous-réseau : échange direct, après ARP. VLAN différents : passage par l'équipement de niveau 3 ; des ACL peuvent autoriser les échanges nécessaires.</p>
+    <p class="pitfall"><strong>Piège :</strong> lors du routage, les MAC de l'enveloppe changent ; les IP source et destination restent celles des PC, en l'absence de NAT. Le broadcast ARP de PC1 reste dans le VLAN 10.</p>
+  </details>
+  <h3>Partie 7 · Analyser les observations</h3>
+  <p>PC1 communique avec PC2 et PC7, mais pas directement avec PC4. PC4 communique avec PC5. Le broadcast de PC1 n'atteint pas PC4.</p>
+  <ol><li>Identifier le VLAN de chaque PC.</li><li>Pourquoi PC1 communique-t-il avec PC7 ?</li><li>Pourquoi son broadcast n'atteint-il pas PC4 ?</li><li>Quel mécanisme isole les VLAN ?</li><li>Que faut-il ajouter pour joindre PC4 ?</li></ol>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <p><strong>1.</strong> Avec la configuration de l'énoncé : VLAN 10 = PC1, PC2, PC3, PC7, PC8 ; VLAN 20 = PC4, PC5, PC6, PC9, PC10, PC11. Les tests seuls ne révèlent pas les numéros de VLAN : ces numéros viennent de l'énoncé.</p>
+    <p><strong>2.</strong> PC1 et PC7 sont dans le VLAN 10 transporté par le trunk ; ils peuvent échanger sans routage inter-VLAN, avec des IP compatibles. <strong>3.</strong> Le switch diffuse uniquement dans le VLAN 10 ; PC4 appartient au 20.</p>
+    <p><strong>4.</strong> L'affectation des ports et le filtrage des sorties par VLAN limitent chaque domaine de broadcast. Le tag conserve cette appartenance sur le trunk. <strong>5.</strong> Ajouter du routage inter-VLAN, des passerelles adaptées et les autorisations de filtrage nécessaires.</p>
+  </details>
+  <h3>Synthèse · Et avec un seul switch de 16 ports ?</h3>
+  <p>Expliquer comment garder la séparation logique EE/CS avec une seule infrastructure physique.</p>
+  <details class="solution"><summary>Voir la correction de synthèse</summary><p>Le switch administrable affecte les ports EE au VLAN 10 et les ports CS au VLAN 20. Les broadcasts restent séparés malgré le switch commun. Déplacer un utilisateur consiste à changer le VLAN de son port. Le trunk S1–S2 disparaît ; le routage entre VLAN reste nécessaire.</p><p>Le dessin contient 11 PC : 16 ports suffisent pour cet exemple, mais <strong>pas pour raccorder simultanément 50 employés</strong>. Il faut également vérifier la possibilité de câbler les deux bâtiments depuis le switch.</p></details>
+  <div class="training"><h3>Variante d'entraînement</h3><p>Après le déplacement de PC4 de CS vers EE, quels PC reçoivent un broadcast envoyé par PC4 ? Peut-il joindre directement PC5 au niveau 2 ?</p><details class="solution"><summary>Voir la réponse de la variante</summary><p>Avec S1/4 affecté au VLAN 10, les destinataires du broadcast sont <strong>PC1, PC2, PC3, PC7 et PC8</strong>. PC5 reste dans le VLAN 20 : PC4 ne peut pas le joindre directement au niveau 2 ; il faut du routage et des IP adaptées.</p></details></div>
+</section>
+
+<section class="lesson exercise" id="e-dijkstra" data-group="exercices">
+  <h2>Exercice 5 · Dijkstra à la main et en Python</h2>
+  <p class="source-note">L'énoncé demande : « Implémenter l'algorithme de routage Dijkstra à travers un exemple ensuite en Python3. » Il ne fournit pas de graphe. Le graphe ci-dessous est l'exemple pédagogique du corrigé Drive, pas un graphe imposé par le professeur.</p>
+  <h3>Travail à refaire</h3>
+  <p>Depuis A, calculer les distances minimales, les prédécesseurs et le chemin vers F. Les liaisons de cet exemple sont <strong>non orientées</strong>.</p>
+  <div class="table-wrap"><table><thead><tr><th>Liaison</th><th>Coût</th><th>Liaison</th><th>Coût</th><th>Liaison</th><th>Coût</th></tr></thead><tbody><tr><td>A–B</td><td>4</td><td>A–C</td><td>2</td><td>B–C</td><td>1</td></tr><tr><td>B–D</td><td>5</td><td>C–D</td><td>8</td><td>C–E</td><td>10</td></tr><tr><td>D–E</td><td>2</td><td>D–F</td><td>6</td><td>E–F</td><td>3</td></tr></tbody></table></div>
+  <p class="formula">Initialisation : d(source) = 0 ; autres distances = ∞<br>À chaque tour : fixer le sommet non fixé de distance minimale<br>Amélioration : si d(u) + coût(u,v) &lt; d(v), remplacer d(v) et noter prédécesseur(v) = u</p>
+  <div class="diagram" id="dijkstra-demo"><h3>Dijkstra, un sommet à la fois</h3><p class="caption">Graphe pédagogique du corrigé Drive. Départ A ; liaisons non orientées.</p><svg id="dijkstra-svg" class="diagram-svg" viewBox="0 0 680 300" role="img" aria-label="Graphe de Dijkstra A B C D E F, arêtes pondérées"><g fill="none" stroke="#b1bfd2" stroke-width="3"><path data-edge="AB" d="M60 145L220 45"/><path data-edge="AC" d="M60 145L220 245"/><path data-edge="BC" d="M220 45V245"/><path data-edge="BD" d="M220 45L400 45"/><path data-edge="CD" d="M220 245L400 45"/><path data-edge="CE" d="M220 245H400"/><path data-edge="DE" d="M400 45V245"/><path data-edge="DF" d="M400 45L590 145"/><path data-edge="EF" d="M400 245L590 145"/></g><g fill="#10213b" font-size="16" font-weight="700" text-anchor="middle" stroke="white" stroke-width="7" paint-order="stroke"><text x="125" y="83">4</text><text x="125" y="220">2</text><text x="204" y="155">1</text><text x="310" y="30">5</text><text x="305" y="155">8</text><text x="310" y="272">10</text><text x="418" y="155">2</text><text x="504" y="83">6</text><text x="504" y="220">3</text></g><g stroke="#6689bd" stroke-width="2" fill="white"><circle data-node="A" cx="60" cy="145" r="25"/><circle data-node="B" cx="220" cy="45" r="25"/><circle data-node="C" cx="220" cy="245" r="25"/><circle data-node="D" cx="400" cy="45" r="25"/><circle data-node="E" cx="400" cy="245" r="25"/><circle data-node="F" cx="590" cy="145" r="25"/></g><g fill="#10213b" font-size="19" font-weight="750" text-anchor="middle"><text x="60" y="152">A</text><text x="220" y="52">B</text><text x="220" y="252">C</text><text x="400" y="52">D</text><text x="400" y="252">E</text><text x="590" y="152">F</text></g></svg><div class="graph-controls"><button class="small-button secondary" id="dijkstra-prev">Étape précédente</button><button class="small-button" id="dijkstra-next">Étape suivante</button><button class="small-button secondary" id="dijkstra-reset">Recommencer</button><span id="dijkstra-counter" class="caption"></span></div><div class="graph-state" id="dijkstra-state" aria-live="polite"></div></div>
+  <details class="solution"><summary>Voir la correction pas à pas</summary>
+    <h3>1. Comprendre les quatre mots utiles</h3>
+    <div class="table-wrap"><table><thead><tr><th>Mot</th><th>Signification</th></tr></thead><tbody><tr><td>Sommet</td><td>Un point du réseau, par exemple le routeur A.</td></tr><tr><td>Arête et coût</td><td>Une liaison et son poids, qui doit être non négatif.</td></tr><tr><td>Distance</td><td>Coût total du meilleur chemin actuellement connu depuis la source.</td></tr><tr><td>Prédécesseur</td><td>Sommet juste avant la destination sur ce chemin.</td></tr></tbody></table></div>
+    <p>Dijkstra recherche le coût total minimal. Une liaison directe peut être plus chère qu'un détour. Exemple : A–B = 7, A–C = 2, C–B = 1 : le chemin A → C → B coûte 3 et améliore le direct à 7.</p>
+    <h3>2. Initialiser</h3><p>On connaît d(A) = 0. Pour les autres sommets, écrire ∞, qui signifie « aucun chemin encore connu ». Aucun prédécesseur au départ.</p>
+    <h3>3. Fixer le plus proche puis améliorer ses voisins</h3>
+    <div class="table-wrap"><table><thead><tr><th>Sommet traité</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>Prédécesseurs modifiés</th></tr></thead><tbody>
+      <tr><td>Départ</td><td>0</td><td>∞</td><td>∞</td><td>∞</td><td>∞</td><td>∞</td><td>—</td></tr>
+      <tr><td>A</td><td>0</td><td>4</td><td>2</td><td>∞</td><td>∞</td><td>∞</td><td>B ← A ; C ← A</td></tr>
+      <tr><td>C</td><td>0</td><td>3</td><td>2</td><td>10</td><td>12</td><td>∞</td><td>B ← C ; D ← C ; E ← C</td></tr>
+      <tr><td>B</td><td>0</td><td>3</td><td>2</td><td>8</td><td>12</td><td>∞</td><td>D ← B</td></tr>
+      <tr><td>D</td><td>0</td><td>3</td><td>2</td><td>8</td><td>10</td><td>14</td><td>E ← D ; F ← D</td></tr>
+      <tr><td>E</td><td>0</td><td>3</td><td>2</td><td>8</td><td>10</td><td>13</td><td>F ← E</td></tr>
+      <tr><td>F</td><td>0</td><td>3</td><td>2</td><td>8</td><td>10</td><td>13</td><td>Aucun</td></tr>
+    </tbody></table></div>
+    <ol><li><strong>Fixer A :</strong> B reçoit 0 + 4 = 4 ; C reçoit 0 + 2 = 2.</li><li><strong>Fixer C :</strong> 2 est la plus petite distance non fixée. Vers B, 2 + 1 = 3 améliore 4 ; vers D, 2 + 8 = 10 ; vers E, 2 + 10 = 12.</li><li><strong>Fixer B :</strong> 3 + 5 = 8 améliore D, auparavant à 10.</li><li><strong>Fixer D :</strong> 8 + 2 = 10 améliore E ; 8 + 6 = 14 donne un chemin vers F.</li><li><strong>Fixer E :</strong> 10 + 3 = 13 améliore F, auparavant à 14.</li><li><strong>Fixer F :</strong> plus aucune amélioration.</li></ol>
+    <h3>4. Reconstruire le chemin</h3><p>Remonter les prédécesseurs : <code>F ← E ← D ← B ← C ← A</code>. Inverser l'ordre : <strong>A → C → B → D → E → F</strong>. Coût : <strong>2 + 1 + 5 + 2 + 3 = 13</strong>.</p>
+    <p>L'arbre minimal retient A–C, C–B, B–D, D–E et E–F. Depuis A, le premier saut vers chacune des autres destinations est C.</p>
+    <p class="pitfall"><strong>Pièges :</strong> choisir la liaison de plus faible poids au lieu du sommet de plus faible <em>distance cumulée</em> ; oublier un prédécesseur lorsqu'une distance s'améliore ; arrêter dès qu'on découvre la destination ; utiliser Dijkstra avec des poids négatifs.</p>
+    <h3>5. Programmer la méthode en Python 3</h3>
+    <p>Le dictionnaire <code>graphe</code> associe à chaque sommet ses voisins et les coûts. Le tas <code>heapq</code> permet de choisir la proposition la moins coûteuse. Un compteur évite de comparer les noms des sommets en cas d'égalité.</p>
+    <pre><code>from heapq import heappop, heappush
+from math import inf, isfinite
+
+def dijkstra(graphe, source):
+    if source not in graphe:
+        raise ValueError("Source absente du graphe")
+    for voisins in graphe.values():
+        for v, poids in voisins.items():
+            if v not in graphe:
+                raise ValueError("Voisin absent du graphe")
+            if not isfinite(poids) or poids &lt; 0:
+                raise ValueError("Coût fini et non négatif requis")
+
+    distance = {v: inf for v in graphe}
+    precedent = {v: None for v in graphe}
+    distance[source] = 0
+    compteur = 0
+    file = [(0, compteur, source)]
+
+    while file:
+        cout, _, u = heappop(file)
+        if cout != distance[u]:
+            continue  # Cette ancienne proposition a été améliorée.
+        for v, poids in graphe[u].items():
+            candidat = cout + poids
+            if candidat &lt; distance[v]:
+                distance[v] = candidat
+                precedent[v] = u
+                compteur += 1
+                heappush(file, (candidat, compteur, v))
+    return distance, precedent
+
+def chemin_vers(precedent, distance, cible):
+    if distance[cible] == inf:
+        return []  # Aucun chemin depuis la source.
+    chemin = []
+    while cible is not None:
+        chemin.append(cible)
+        cible = precedent[cible]
+    return chemin[::-1]
+
+graphe = {
+    "A": {"B": 4, "C": 2},
+    "B": {"A": 4, "C": 1, "D": 5},
+    "C": {"A": 2, "B": 1, "D": 8, "E": 10},
+    "D": {"B": 5, "C": 8, "E": 2, "F": 6},
+    "E": {"C": 10, "D": 2, "F": 3},
+    "F": {"D": 6, "E": 3},
+}
+distances, precedents = dijkstra(graphe, "A")
+for sommet in graphe:
+    chemin = chemin_vers(precedents, distances, sommet)
+    print(sommet, distances[sommet], " -&gt; ".join(chemin))</code></pre>
+    <p>Les sommets isolés doivent aussi être des clés du dictionnaire. Une arête non orientée s'écrit dans les deux sens avec le même poids.</p>
+    <pre><code>A 0 A
+B 3 A -&gt; C -&gt; B
+C 2 A -&gt; C
+D 8 A -&gt; C -&gt; B -&gt; D
+E 10 A -&gt; C -&gt; B -&gt; D -&gt; E
+F 13 A -&gt; C -&gt; B -&gt; D -&gt; E -&gt; F</code></pre>
+    <p>Une cible inaccessible conserve ∞ et son chemin vaut <code>[]</code>. En cas de chemins minimaux de même coût, ce programme conserve le premier découvert.</p>
+  </details>
+  <div class="training"><h3>Variante d'entraînement</h3><p>Ajout pédagogique déjà présent dans le corrigé Drive : graphe non orienté A–B = 6, A–C = 2, C–B = 1, B–D = 3. Trouver les distances depuis A et le chemin vers D.</p><details class="solution"><summary>Voir la réponse de la variante</summary><p>Après A : B = 6, C = 2. Après C : B = 2 + 1 = 3. Après B : D = 3 + 3 = 6. Distances finales : <strong>A = 0, C = 2, B = 3, D = 6</strong>. Chemin : <strong>A → C → B → D</strong>.</p></details></div>
+</section>
+<section class="lesson" id="tp-reseau" data-group="tp">
+  <p class="eyebrow">TP1 · Exercice 1 · À maîtriser</p>
+  <h2>Construire deux LAN et expliquer chaque trajet</h2>
+  <p class="lead">Le but n'est pas de retenir une liste de clics : il faut savoir pourquoi un PC communique directement dans son LAN, puis pourquoi il a besoin d'une passerelle et de routes pour joindre un autre LAN.</p>
+  <div class="callout"><strong>Scénario suivi : ton compte rendu corrigé.</strong> Il utilise un masque /24 partout. Le tutoriel utilise parfois d'autres adresses et masques ; les variantes sont expliquées plus bas. Les résultats cités viennent du compte rendu : le fichier Packet Tracer n'a pas été exécuté pour créer cette fiche.</div>
+  <figure class="diagram"><svg class="diagram-svg" viewBox="0 0 750 295" role="img" aria-label="TP1 du compte rendu : LAN1 relié à R1, transit R1 R2, LAN2 relié à R2 et Wi-Fi relié à R1"><g stroke="#225ce0" stroke-width="3" fill="none"><path d="M170 100H245M345 100H420M520 100H585M295 140V205"/></g><g stroke="#a1b6d3" stroke-width="2" fill="white"><rect x="5" y="55" width="165" height="90" rx="10"/><rect x="245" y="60" width="100" height="80" rx="10"/><rect x="420" y="60" width="100" height="80" rx="10"/><rect x="585" y="55" width="160" height="90" rx="10"/><rect x="205" y="205" width="180" height="80" rx="10"/></g><g fill="#10213b" text-anchor="middle" font-size="16"><text x="87" y="82" font-weight="700">LAN1</text><text x="87" y="108" font-size="14">192.168.0.0/24</text><text x="87" y="131" font-size="13">Switch0 + Hub0</text><text x="295" y="93" font-weight="700">R1</text><text x="295" y="119" font-size="14">10.10.0.1</text><text x="470" y="93" font-weight="700">R2</text><text x="470" y="119" font-size="14">10.10.0.2</text><text x="665" y="82" font-weight="700">LAN2</text><text x="665" y="108" font-size="14">172.168.0.0/24</text><text x="665" y="131" font-size="13">Switch1 · Web + DNS .3</text><text x="382" y="44" font-size="14">Transit 10.10.0.0/24</text><text x="295" y="233" font-weight="700">Point d’accès Wi-Fi</text><text x="295" y="259" font-size="14">20.0.0.0/24</text><text x="65" y="190" font-size="14">Passerelles LAN : .254</text></g></svg><figcaption>Schéma logique simplifié du compte rendu DOCX. Les routes statiques doivent exister à l’aller et au retour.</figcaption></figure>
+  <h3>1. À quoi sert chaque équipement ?</h3>
+  <div class="table-wrap"><table><thead><tr><th>Équipement</th><th>Rôle</th><th>Ce qu'il faut expliquer</th></tr></thead><tbody>
+    <tr><td>Hub</td><td>Répète le signal sur ses autres ports.</td><td>Il ne consulte pas les MAC ; les appareils partagent le support.</td></tr>
+    <tr><td>Switch</td><td>Apprend les MAC et leur port.</td><td>Un unicast connu va vers le bon port ; broadcasts et unicasts inconnus sont diffusés dans le VLAN.</td></tr>
+    <tr><td>Routeur</td><td>Relie plusieurs réseaux IP.</td><td>Il consulte la destination IP et choisit une route.</td></tr>
+    <tr><td>Serveur DHCP</td><td>Donne IP, masque, passerelle et DNS.</td><td>Il évite la saisie manuelle sur chaque PC.</td></tr>
+    <tr><td>Serveur DNS</td><td>Associe un nom à une IP.</td><td>Le nom <code>ensam.fr</code> permet de retrouver le serveur Web.</td></tr>
+    <tr><td>Serveur HTTP</td><td>Fournit une page au navigateur.</td><td>Le navigateur demande <code>index.html</code> au serveur.</td></tr>
+    <tr><td>Point d'accès</td><td>Relie les clients Wi-Fi au réseau câblé.</td><td>La borne est câblée ; les portables utilisent la radio.</td></tr>
+  </tbody></table></div>
+  <details><summary>Question corrigée : pourquoi ne pas mettre tous les PC dans le même réseau ?</summary><p><strong>Méthode.</strong> Penser organisation, diffusion et contrôle des accès.</p><p><strong>Réponse.</strong> Séparer les groupes limite les broadcasts à chaque réseau et facilite l'organisation. Le routeur permet les échanges entre groupes. Pour interdire certains échanges, il faut aussi des règles de filtrage : la séparation seule ne suffit pas.</p><p>Le réseau <code>10.10.0.0/24</code> au milieu sert ici de <strong>transit entre R1 et R2</strong>. Le sujet le nomme « management », mais le montage décrit ne montre pas de réseau de management dédié.</p></details>
+  <h3>2. Remplir un plan d'adressage cohérent</h3>
+  <p><strong>IP :</strong> l'adresse de l'équipement. <strong>Masque :</strong> la frontière réseau/hôte. <strong>Passerelle :</strong> l'interface du routeur dans le LAN du PC. <strong>DNS :</strong> le serveur utilisé pour retrouver une IP à partir d'un nom.</p>
+  <div class="table-wrap"><table><thead><tr><th>Réseau</th><th>Adresse / masque</th><th>Interface du routeur</th></tr></thead><tbody>
+    <tr><td>LAN1</td><td><code>192.168.0.0/24</code> · 255.255.255.0</td><td>R1 G0/0 : <code>192.168.0.254</code></td></tr>
+    <tr><td>Transit</td><td><code>10.10.0.0/24</code> · 255.255.255.0</td><td>R1 G0/1 : <code>10.10.0.1</code><br>R2 G0/1 : <code>10.10.0.2</code></td></tr>
+    <tr><td>LAN2</td><td><code>172.168.0.0/24</code> · 255.255.255.0</td><td>R2 G0/0 : <code>172.168.0.254</code></td></tr>
+    <tr><td>Wi-Fi</td><td><code>20.0.0.0/24</code> · 255.255.255.0</td><td>R1 G0/2 : <code>20.0.0.254</code></td></tr>
+  </tbody></table></div>
+  <div class="table-wrap"><table><thead><tr><th>Équipement</th><th>Adresse /24 dans le CR</th><th>Passerelle</th></tr></thead><tbody>
+    <tr><td>DHCP_LAN1</td><td><code>192.168.0.2</code> fixe</td><td><code>192.168.0.254</code></td></tr>
+    <tr><td>Laptop1 / Laptop0 / PC0 / PC1</td><td><code>192.168.0.10 / .11 / .12 / .13</code> par DHCP</td><td><code>192.168.0.254</code></td></tr>
+    <tr><td>PC2 / Laptop2 / Laptop3</td><td><code>172.168.0.10 / .11 / .12</code> fixes</td><td><code>172.168.0.254</code></td></tr>
+    <tr><td>Web + DNS</td><td><code>172.168.0.3</code> fixe</td><td><code>172.168.0.254</code></td></tr>
+    <tr><td>Laptop4 / Laptop5 Wi-Fi</td><td><code>20.0.0.10 / .11</code> fixes</td><td><code>20.0.0.254</code></td></tr>
+  </tbody></table></div>
+  <p>DNS de tous les clients : <code>172.168.0.3</code>. Les IP DHCP ci-dessus sont celles relevées dans le CR et peuvent changer. La plage configurée est <code>192.168.0.10 → 192.168.0.59</code>, soit 50 adresses.</p>
+  <details><summary>Question corrigée : la passerelle est-elle nécessaire pour PC0 → PC1 ?</summary><p><strong>Méthode.</strong> Calculer les deux adresses réseau avec le masque /24.</p><p><strong>Correction.</strong> PC0 <code>192.168.0.12</code> et PC1 <code>192.168.0.13</code> appartiennent tous deux à <code>192.168.0.0/24</code>. L'échange est local ; le routeur ne participe pas. Une passerelle correcte devient nécessaire pour joindre LAN2 ou le Wi-Fi.</p></details>
+  <h3>3. Refaire la configuration dans Packet Tracer</h3>
+  <ol>
+    <li><strong>Placer et câbler.</strong> LAN1 contient switch, hub, 4 clients et serveur DHCP ; LAN2 contient switch, 3 clients et serveur Web/DNS. R1 relie LAN1, le transit et le Wi-Fi ; R2 relie transit et LAN2. Adapter les noms de ports au modèle choisi.</li>
+    <li><strong>Activer les interfaces des routeurs.</strong> Config → interface → Port Status On, puis IP/masque du tableau. En CLI, utiliser <code>ip address …</code> et <code>no shutdown</code>.</li>
+    <li><strong>Configurer le DHCP.</strong> Serveur → Desktop → IP Configuration : IP fixe .2, masque /24, passerelle .254. Services → DHCP → On : début .10, masque /24, maximum 50, passerelle .254 et DNS 172.168.0.3. Sauvegarder la plage.</li>
+    <li><strong>Configurer les clients.</strong> LAN1 : Desktop → IP Configuration → DHCP. LAN2 : Static et IP du tableau. Lire les paramètres obtenus avant les tests.</li>
+    <li><strong>Tester en local.</strong> Depuis PC0 : <code>ping 192.168.0.13</code>. Depuis PC2 : <code>ping 172.168.0.11</code>. Tester ensuite les passerelles.</li>
+    <li><strong>Ajouter les routes aller et retour.</strong> Saisir les routes ci-dessous, puis retester PC0 → PC2.</li>
+    <li><strong>Configurer Web et DNS.</strong> Sur .3, Services → HTTP → On ; modifier index.html. DNS → On ; enregistrement A : ensam.fr → 172.168.0.3. Tester la page par IP, puis par nom.</li>
+    <li><strong>Ajouter le Wi-Fi.</strong> Câbler l'AP sur R1 G0/2. SSID du CR : TP1_WIFI ; sécurité WPA2-PSK. Au besoin, éteindre le laptop, remplacer sa carte par WPC300N, rallumer. PC Wireless → connexion au SSID. Saisir IP, /24, passerelle 20.0.0.254 et DNS 172.168.0.3. Ajouter la route retour Wi-Fi sur R2.</li>
+  </ol>
+  <details><summary>Comprendre DHCP : les quatre échanges DORA</summary><p><strong>Discover :</strong> le client cherche un serveur. <strong>Offer :</strong> le serveur propose une configuration. <strong>Request :</strong> le client demande cette proposition. <strong>Acknowledge :</strong> le serveur la valide.</p><p>DHCP utilise UDP : client 68, serveur 67. Un PC ne doit pas recevoir une IP déjà utilisée par un équipement fixe.</p></details>
+  <h3>4. Question corrigée : pourquoi LAN1 → LAN2 échoue avant les routes ?</h3>
+  <p><strong>Méthode.</strong> Distinguer ce que chaque routeur connaît directement de ce qu'il doit apprendre. R1 connaît LAN1, transit et Wi-Fi ; R2 connaît LAN2 et transit. La destination distante n'est pas encore dans leur table.</p>
+  <pre><code>R1(config)# ip route 172.168.0.0 255.255.255.0 10.10.0.2
+R2(config)# ip route 192.168.0.0 255.255.255.0 10.10.0.1
+R2(config)# ip route 20.0.0.0 255.255.255.0 10.10.0.1</code></pre>
+  <p><strong>Correction.</strong> Une route indique <em>le réseau à atteindre, son masque, le prochain routeur</em>. R1 envoie LAN2 vers R2 ; R2 connaît le chemin de retour vers LAN1 et le Wi-Fi. Le prochain saut doit être une IP du routeur voisin sur le transit.</p>
+  <div class="table-wrap"><table><thead><tr><th>Routeur</th><th>Connectées automatiquement si interfaces actives</th><th>Statiques à ajouter</th></tr></thead><tbody><tr><td>R1</td><td>192.168.0.0/24 → G0/0<br>10.10.0.0/24 → G0/1<br>20.0.0.0/24 → G0/2</td><td>172.168.0.0/24 → 10.10.0.2</td></tr><tr><td>R2</td><td>172.168.0.0/24 → G0/0<br>10.10.0.0/24 → G0/1</td><td>192.168.0.0/24 et 20.0.0.0/24 → 10.10.0.1</td></tr></tbody></table></div>
+  <h3>5. Expliquer ARP, ICMP et les changements d'adresses</h3>
+  <details open><summary>PC0 → PC1, dans le même LAN</summary><p>PC0 reconnaît une destination locale grâce au masque. Il demande <strong>la MAC de PC1</strong> avec un ARP Request broadcast si elle n'est pas en cache. PC1 répond. PC0 envoie ICMP Echo Request ; PC1 renvoie Echo Reply.</p><p>Chemin documenté : <strong>PC0 → Switch0 → Hub0 → PC1</strong>. Le hub répète aussi vers Laptop1. Le routeur n'intervient pas.</p></details>
+  <details><summary>PC0 → PC2, dans un autre LAN</summary><p>PC0 reconnaît une destination distante. Il cherche <strong>la MAC de sa passerelle R1</strong>, pas celle de PC2. La trame vise localement R1, tandis que le paquet IP vise PC2.</p><p>Trajet : <strong>PC0 → Switch0 → R1 → R2 → Switch1 → PC2</strong>. Chaque routeur choisit une route et crée une nouvelle trame pour la liaison suivante. Les MAC changent sur les liaisons routées ; dans ce montage sans NAT, les IP source/destination restent celles de PC0/PC2. Le retour doit aussi avoir une route.</p></details>
+  <details><summary>Le navigateur demande http://ensam.fr</summary><p>DNS retrouve <code>172.168.0.3</code>. Le client établit une connexion TCP, puis HTTP demande la page sur le port 80. ARP et IPv4 permettent les transmissions sur les liaisons et entre réseaux.</p><p>DNS et HTTP sont en application ; TCP/UDP en transport ; IPv4 et ICMP en réseau ; Ethernet/Wi-Fi en liaison. ARP associe IP et MAC au niveau local. ICMP n'a pas de ports TCP/UDP.</p></details>
+  <p class="source-note">Sources : TP1, exercice 1 ; compte rendu « Réseaux sur Cisco Packet Tracer », parties 1.1 à 1.5 ; tutoriel de réalisation. <a href="https://www.cisco.com/c/en/us/support/docs/dial-access/floating-static-route/118263-technote-nexthop-00.html" target="_blank" rel="noopener">Référence Cisco sur le prochain saut</a>.</p>
+</section>
+
+<section class="lesson" id="tp-apprentarts" data-group="tp">
+  <p class="eyebrow">TP1 · Exercice 2 · Approfondissement</p>
+  <h2>ApprentArts : découper un réseau et contrôler les accès</h2>
+  <p class="lead">Cet exercice ajoute des VLAN, du DHCP sur le routeur, des règles de filtrage et un Internet simulé. Commence par maîtriser le calcul /27 et le rôle de chaque équipement.</p>
+  <h3>Énoncé et choix du corrigé</h3>
+  <p>3 PC Direction, 3 Comptabilité, 6 Technique, 3 serveurs, un Wi-Fi employés et un Wi-Fi visiteurs. Les services accèdent aux serveurs ; les visiteurs sont isolés du réseau interne. Le corrigé crée <strong>six VLAN</strong> et utilise Router0, deux switches 2960, deux points d'accès et un pare-feu ASA.</p>
+  <p>Un <strong>VLAN</strong> crée un groupe de niveau 2 séparé sur les switches. Un port <strong>access</strong> raccorde un équipement à un VLAN ; un port <strong>trunk</strong> transporte plusieurs VLAN. Router0 assure la communication entre VLAN.</p>
+  <h3>Question corrigée : comment découper 192.168.10.0/24 ?</h3>
+  <p><strong>Méthode.</strong> Avec /27, il reste <code>32 − 27 = 5</code> bits hôte. Donc <code>2⁵ = 32</code> adresses par bloc, dont <code>32 − 2 = 30</code> utilisables. Le masque est <code>255.255.255.224</code> et le pas vaut <code>256 − 224 = 32</code>.</p>
+  <p><strong>Correction.</strong> Les blocs commencent à .0, .32, .64, .96, .128 et .160. La passerelle prend la première IP utilisable. Dans chaque VLAN client, réserver les cinq premières IP utilisables laisse 25 IP DHCP.</p>
+  <div class="table-wrap"><table><thead><tr><th>VLAN</th><th>Réseau /27</th><th>Hôtes utilisables</th><th>Broadcast</th><th>Passerelle</th><th>DHCP du CR</th></tr></thead><tbody>
+    <tr><td>10 Direction</td><td>.0</td><td>.1–.30</td><td>.31</td><td>.1</td><td>.6–.30</td></tr>
+    <tr><td>20 Comptabilité</td><td>.32</td><td>.33–.62</td><td>.63</td><td>.33</td><td>.38–.62</td></tr>
+    <tr><td>30 Technique</td><td>.64</td><td>.65–.94</td><td>.95</td><td>.65</td><td>.70–.94</td></tr>
+    <tr><td>40 Serveurs</td><td>.96</td><td>.97–.126</td><td>.127</td><td>.97</td><td>Fixes</td></tr>
+    <tr><td>50 Wi-Fi employés</td><td>.128</td><td>.129–.158</td><td>.159</td><td>.129</td><td>.134–.158</td></tr>
+    <tr><td>60 Wi-Fi visiteurs</td><td>.160</td><td>.161–.190</td><td>.191</td><td>.161</td><td>.166–.190</td></tr>
+  </tbody></table></div>
+  <p>Toutes les adresses du tableau commencent par <code>192.168.10</code>, masque <code>255.255.255.224</code>. Serveurs fichiers/Web/sauvegarde : <code>192.168.10.100 / .101 / .102</code>, passerelle <code>.97</code>. Le DNS DHCP du CR est extérieur : <code>203.0.113.2</code>.</p>
+  <details><summary>Question corrigée : peut-on donner .95 à un PC Technique ?</summary><p><strong>Non.</strong> Le réseau Technique est .64/27, ses hôtes vont de .65 à .94 et sa diffusion est .95. Une IP de réseau ou de diffusion n'est pas attribuée à un PC. Une passerelle utilise aussi une adresse de la plage hôte.</p></details>
+  <h3>Branchements exacts décrits dans le compte rendu</h3>
+  <div class="table-wrap"><table><thead><tr><th>Équipement</th><th>Ports / rôle</th></tr></thead><tbody><tr><td>Switch0</td><td>Fa0/1 → Router0 (trunk) ; Fa0/2 → Switch1 (trunk) ; Fa0/3–5 → Direction ; Fa0/6–8 → Comptabilité.</td></tr><tr><td>Switch1</td><td>Fa0/1 → Switch0 (trunk) ; Fa0/2–7 → Technique ; Fa0/8–10 → serveurs ; Fa0/11 → AP employés ; Fa0/12 → AP visiteurs.</td></tr><tr><td>Router0</td><td>Fa0/0.10 à Fa0/0.60 : une sous-interface par VLAN sur le même câble Fa0/0.</td></tr></tbody></table></div>
+  <h3>Refaire la configuration sans perdre le fil</h3>
+  <ol>
+    <li><strong>Créer les six VLAN sur les deux switches.</strong> Un VLAN utile au-delà d'un switch doit être présent sur les switches qui le transportent.</li>
+    <li><strong>Affecter les ports access.</strong> Exemple Direction : <code>switchport mode access</code>, puis <code>switchport access vlan 10</code>. Configurer les liens vers Router0 et entre switches en <code>switchport mode trunk</code>.</li>
+    <li><strong>Activer Fa0/0 et créer les sous-interfaces du routeur.</strong> Exemple Comptabilité ci-dessous ; répéter pour les autres passerelles.</li>
+    <li><strong>Configurer les pools DHCP clients.</strong> Exclure les cinq premières IP hôte de chaque VLAN, puis renseigner réseau, masque, passerelle et DNS. Garder les serveurs en IP fixe.</li>
+    <li><strong>Tester les accès autorisés, puis ajouter les ACL.</strong> Une règle concerne un sens de trafic et une interface. Tester aussi un refus prévu.</li>
+    <li><strong>Ajouter l'extérieur simulé si demandé.</strong> Configurer transit, routes, pare-feu et NAT/PAT, puis tester HTTP par IP et par nom.</li>
+  </ol>
+  <pre><code>interface fa0/0
+ no shutdown
+interface fa0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.10.33 255.255.255.224
+
+ip dhcp excluded-address 192.168.10.1 192.168.10.5
+ip dhcp pool DIR
+ network 192.168.10.0 255.255.255.224
+ default-router 192.168.10.1
+ dns-server 203.0.113.2</code></pre>
+  <p>Les noms d'interface dépendent du modèle : le CR utilise un 1841 et <code>Fa0/0.X</code> ; le tutoriel montre <code>G0/0.X</code>. Adapter le nom sans changer le plan d'adressage.</p>
+  <h3>Question corrigée : comment isoler les visiteurs ?</h3>
+  <p><strong>Méthode.</strong> Leur permettre d'obtenir une IP, interdire les destinations internes, puis permettre les destinations extérieures. Une <strong>ACL</strong> est une liste de règles « autoriser/refuser ». Elle est lue dans l'ordre ; la première correspondance décide. Sans règle correspondante, le trafic est refusé.</p>
+  <pre><code>ip access-list extended ACL_VISITEURS
+ permit udp any eq bootpc any eq bootps
+ deny ip 192.168.10.160 0.0.0.31 192.168.10.0 0.0.0.255
+ permit ip 192.168.10.160 0.0.0.31 any
+interface fa0/0.60
+ ip access-group ACL_VISITEURS in</code></pre>
+  <p><strong>Correction.</strong> Le premier échange DHCP part de <code>0.0.0.0</code> ; le seul permit pour la source .160/27 ne suffit pas. Le DNS doit être joignable : dans le CR, il est externe. La wildcard <code>0.0.0.31</code> est le complément du masque /27 ; les bits à 1 peuvent varier.</p>
+  <p>Pour Technique → Comptabilité, la règle de refus vise la source <code>192.168.10.64 0.0.0.31</code> et la destination <code>192.168.10.32 0.0.0.31</code>. Le Wi-Fi employés a un refus analogue. Préserver DHCP et les accès utiles après ces refus. <a href="https://www.cisco.com/c/en/us/support/docs/security/ios-firewall/23602-confaccesslists.html" target="_blank" rel="noopener">Référence Cisco : ACL et DHCP</a>.</p>
+  <div class="callout"><strong>Piège du corrigé.</strong> Une ACL simple filtre aussi les réponses. Même un ping lancé depuis Comptabilité vers Technique peut échouer si sa réponse Technique → Comptabilité est bloquée. Deux PC du même VLAN passent par le switch et ne traversent pas cette ACL du routeur.</div>
+  <h3>NAT, routes et Internet simulé</h3>
+  <p><strong>NAT</strong> traduit des adresses IP. <strong>PAT</strong> utilise aussi les ports pour permettre à plusieurs clients de partager une adresse extérieure. Le routeur doit connaître la sortie et le pare-feu le chemin de retour.</p>
+  <ul><li>Transit Router0–ASA : <code>192.168.10.192/30</code>, Router0 .193, ASA .194 ; masque 255.255.255.252 ; diffusion .195.</li><li>Route par défaut Router0 → <code>192.168.10.194</code> ; retour ASA vers les VLAN → <code>192.168.10.193</code>.</li><li>ASA–Router1 : <code>198.51.100.0/30</code>, ASA .1, Router1 .2.</li><li>Serveur extérieur : <code>203.0.113.2/24</code>, passerelle .1 ; DNS <code>internet.test → 203.0.113.2</code>.</li></ul>
+  <p>Trajet serveur interne : <strong>PC0 → Switch0 → Router0 → Switch0 → Switch1 → Server1</strong>. Le câble vers Router0 est utilisé à l'aller et au retour dans des VLAN différents. Trajet extérieur : <strong>client → Router0 → ASA0 → Router1 → Server3</strong>.</p>
+  <div class="table-wrap"><table><thead><tr><th>Test à refaire</th><th>Résultat prévu</th></tr></thead><tbody><tr><td>Direction, Comptabilité, Technique, employés → serveurs</td><td>Autorisé</td></tr><tr><td>Technique / employés → Comptabilité</td><td>Refusé</td></tr><tr><td>Visiteurs → réseau interne</td><td>Refusé</td></tr><tr><td>Visiteurs → Internet simulé</td><td>Autorisé si WAN/NAT/routes sont configurés</td></tr></tbody></table></div>
+  <p>Le CR rapporte une correction HTTP sur ASA avec <code>inspect http</code>, puis le Web extérieur fonctionnel. C'est une correction propre à la maquette, pas une commande à appliquer à toute panne Web. Les pings des serveurs fichiers et sauvegarde valident leur connectivité ; ils ne prouvent ni un transfert de fichier ni une restauration.</p>
+  <details><summary>Question corrigée : justifier performance, sécurité, évolutivité et coût</summary><p><strong>Performance :</strong> les VLAN limitent les broadcasts ; le lien FastEthernet partagé vers le routeur peut limiter les échanges entre VLAN. <strong>Sécurité :</strong> visiteurs séparés et filtrage de Comptabilité. <strong>Évolutivité :</strong> 30 IP hôte par /27 ; six blocs utilisés, puis transit .192/30 ; .196 à .255 non affectées, à redécouper correctement. <strong>Coût :</strong> deux switches et un routeur simplifient la maquette. Il n'y a pas de redondance : une panne du routeur coupe les échanges entre VLAN.</p></details>
+  <p class="source-note">Sources : TP1, exercice 2 ApprentArts ; compte rendu, parties 2.1 à 2.7 ; tutoriel de réalisation. Cette partie complète la révision ; privilégier d'abord les exercices de calcul et l'exercice 1.</p>
+</section>
+
+<section class="lesson" id="tp-diagnostic" data-group="tp">
+  <p class="eyebrow">TP1 · Méthode de dépannage</p>
+  <h2>Un test échoue : trouver la cause dans le bon ordre</h2>
+  <p class="lead">Commence au plus près du PC. Chaque test réussi élimine une famille de causes et permet d'aller un cran plus loin.</p>
+  <ol><li><strong>Lien physique :</strong> câble, port actif, bonne carte réseau.</li><li><strong>Configuration PC :</strong> IP unique, bon masque, passerelle dans le LAN, DNS correct.</li><li><strong>Même LAN :</strong> tester un voisin ; vérifier VLAN, MAC et ARP.</li><li><strong>Passerelle :</strong> la pinguer ; vérifier l'interface du routeur.</li><li><strong>Réseau distant :</strong> vérifier routes aller et retour, prochains sauts, ACL.</li><li><strong>Application :</strong> tester Web par IP puis par nom ; vérifier DNS, service HTTP et pare-feu.</li></ol>
+  <div class="table-wrap"><table><thead><tr><th>Commande / outil</th><th>Question à laquelle il répond</th></tr></thead><tbody><tr><td>PC : <code>ipconfig</code></td><td>Quelle IP, quel masque, quelle passerelle ont été reçus ?</td></tr><tr><td>PC : <code>ping IP</code></td><td>La cible répond-elle aux échanges ICMP ?</td></tr><tr><td>PC : <code>arp -a</code>, si disponible</td><td>Quelle MAC locale est associée à cette IP ?</td></tr><tr><td>Routeur : <code>show ip interface brief</code></td><td>Les bonnes IP sont-elles sur des interfaces actives ?</td></tr><tr><td>Routeur : <code>show ip route</code></td><td>Le routeur connaît-il le réseau cible ?</td></tr><tr><td>Routeur : <code>show arp</code></td><td>Le routeur connaît-il la MAC du prochain équipement local ?</td></tr><tr><td>Routeur : <code>show access-lists</code></td><td>Une règle de filtrage explique-t-elle le refus ?</td></tr><tr><td>Switch : <code>show vlan brief</code>, <code>show interfaces trunk</code></td><td>Le port access et les trunks sont-ils dans les bons VLAN ?</td></tr><tr><td>Switch : <code>show mac address-table</code></td><td>Sur quel port le switch a-t-il appris le destinataire ?</td></tr></tbody></table></div>
+  <details><summary>Le premier ping perd un paquet : dois-je conclure que le réseau est faux ?</summary><p><strong>Non, pas sur ce seul indice.</strong> ARP peut retarder la première réponse dans la simulation. Répéter le test et regarder ARP/ICMP. Des pertes répétées imposent un diagnostic ; ne pas attribuer toutes les pannes à ARP.</p></details>
+  <details><summary>Le ping marche, mais la page Web ne s'ouvre pas</summary><p>Le ping teste ICMP ; HTTP utilise TCP 80. Vérifier HTTP On, l'URL avec <code>http://</code>, le serveur et les règles du pare-feu. Si la page marche par IP mais échoue par nom, vérifier le DNS et son enregistrement A.</p></details>
+  <details><summary>Mode Simulation : que dois-je raconter à chaque étape ?</summary><p>Filtrer ARP et ICMP, envoyer une Simple PDU, avancer avec Capture/Forward. À chaque passage : 1) quel équipement reçoit ; 2) quelle MAC locale est visée ; 3) quelle IP finale est visée ; 4) qui prend la décision suivante ; 5) quelle route permet l'aller puis le retour. La PDU simple sert au ping, elle ne remplace pas un test Web.</p></details>
+  <h3>Les différences entre ton corrigé et le tutoriel</h3>
+  <div class="table-wrap"><table><thead><tr><th>Point</th><th>Corrigé suivi ici</th><th>Tutoriel / variante</th></tr></thead><tbody><tr><td>LAN2 / Wi-Fi ex. 1</td><td>/24 / /24</td><td>/16 / /8</td></tr><tr><td>Transit R1 / R2</td><td>10.10.0.1 / .2</td><td>10.10.0.200 / .100</td></tr><tr><td>Web / DNS ex. 1</td><td>Un serveur 172.168.0.3</td><td>Deux serveurs .4 / .5</td></tr><tr><td>SSID ex. 1</td><td>TP1_WIFI</td><td>ENSAM-WIFI</td></tr><tr><td>Serveurs ex. 2</td><td>Switch1 Fa0/8–10</td><td>SW1 Fa0/9–11</td></tr><tr><td>Points d'accès ex. 2</td><td>Switch1 Fa0/11–12</td><td>SW2 Fa0/8–9</td></tr><tr><td>DHCP ex. 2</td><td>Cinq premières IP hôte réservées ; DNS extérieur .2</td><td>Réservations différentes ; DNS interne .101</td></tr><tr><td>ACL + DHCP ex. 2</td><td>Le CR dit DHCP autorisé</td><td>Le tutoriel omet l'exception initiale ; son DNS interne est bloqué aux visiteurs</td></tr></tbody></table></div>
+  <div class="callout"><strong>Règle pour le contrôle.</strong> Suivre le plan de l'énoncé remis par le professeur. Les variantes peuvent fonctionner si tout est cohérent ; ne pas mélanger masques, routes et prochains sauts de scénarios différents.</div>
+  <p><code>172.168.0.0</code> et <code>20.0.0.0</code> sont les valeurs de la maquette, pas des plages privées usuelles. Les plages privées IPv4 sont <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code> (172.16 à 172.31) et <code>192.168.0.0/16</code>.</p>
+  <p class="source-note">Sources : TP1 et ses deux documents d'accompagnement. Les tests relatés sont ceux du compte rendu ; cette fiche ne prétend pas avoir vérifié le fichier .pkt.</p>
+</section>
+<section class="lesson" id="f-formules" data-group="formules"><h2>Les formules, avec leurs unités</h2><p class="lead">Commence toujours par écrire les données et les unités. Une formule sert à répondre à une question précise.</p><h3>Bits, octets et durée de transmission</h3><div class="formula">1 octet = 8 bits<br>t = L / R<small>L : longueur en bits ; R : débit en bits/s ; t : durée en secondes.</small></div><p>Si une longueur est donnée en octets, multiplie-la par 8 avant de la diviser par un débit en bit/s. Par exemple, 1 500 octets à 100 Mbit/s demandent 12 000 / 100 000 000 = <strong>120 µs</strong> de transmission. Ce temps ne comprend ni la propagation, ni l’attente, ni les autres en-têtes. Exemple de consolidation ajouté.</p><h3>Adressage IPv4 et masque</h3><div class="formula">Adresse réseau = adresse IP ET masque<br>Nombre d’adresses = 2<sup>32 − préfixe</sup><br>Hôtes usuels = 2<sup>32 − préfixe</sup> − 2</div><p>Pour <strong>/24</strong>, il reste 8 bits d’hôte : 256 adresses, dont 254 utilisables dans un sous-réseau classique. L’adresse réseau met tous les bits d’hôte à 0 ; le broadcast met tous les bits d’hôte à 1. La formule « −2 » ne s’applique pas telle quelle aux liens /31 ni à /32.</p><p>Exemple : 192.168.1.10/24 → réseau 192.168.1.0, broadcast 192.168.1.255, hôtes .1 à .254. Pour décider si deux machines sont dans le même sous-réseau, applique le masque aux deux IP puis compare les deux résultats.</p><h3>En-tête IPv4 et fragmentation</h3><div class="formula">H = 4 × IHL<br>D = longueur totale − H<br>B = 8 × ⌊(MTU − H) / 8⌋<br>Nombre de fragments = ⌈D / B⌉<br>Offset = nombre d’octets de données déjà envoyés / 8<small>H, D, B et MTU en octets. B est le maximum de données d’un fragment non final. ⌊ ⌋ : entier inférieur ; ⌈ ⌉ : entier supérieur.</small></div><p>Si le paquet tient dans la MTU, il reste entier. Sinon, ce calcul suppose IPv4, DF = 0 et un en-tête de même taille dans chaque fragment, sans gestion particulière des options. Les données du dernier fragment peuvent ne pas être multiples de 8. <strong>MF = 1</strong> sauf pour le dernier fragment ; l’identification reste commune.</p><div class="lab" id="fragment-lab"><h3>Entraînement : change les tailles</h3><p class="caption">IPv4, DF = 0, en-tête sans options de 20 octets. Pour un contrôle, refais d’abord le calcul au brouillon.</p><form id="fragment-form"><div class="grid-two"><label>Longueur totale du paquet (octets)<input id="frag-total" type="number" min="20" max="65535" value="4000" required></label><label>MTU (octets)<input id="frag-mtu" type="number" min="28" max="65535" value="1500" required></label></div><div class="button-row"><button class="small-button" type="submit">Calculer les fragments</button></div></form><div id="fragment-result" aria-live="polite"></div></div><h3>Checksum Internet sur 16 bits</h3><div class="formula">Somme : addition des mots de 16 bits<br>Report : (somme & 0xFFFF) + (somme &gt;&gt; 16)<br>Checksum : 0xFFFF XOR somme reportée<small>Recommence le report tant qu’il reste un dépassement. Le complément est sur exactement 16 bits.</small></div><p>À la réception, additionne les mots et le checksum avec report circulaire : résultat attendu <strong>0xFFFF</strong>. Si tu inverses ensuite les bits, tu obtiens 0x0000. Le checksum de l’en-tête IPv4 protège seulement cet en-tête.</p><div class="lab"><h3>Entraînement : addition et report</h3><form id="checksum-form"><label>Mots hexadécimaux de 16 bits, séparés par des espaces<input id="checksum-input" value="1234 5678 9ABC 1123" spellcheck="false" autocomplete="off" required></label><div class="button-row"><button class="small-button" type="submit">Calculer le checksum</button></div></form><div id="checksum-result" aria-live="polite"></div></div><h3>CRC</h3><div class="formula">r = nombre de bits de G − 1<br>R = reste de la division XOR de D suivi de r zéros par G<br>Trame envoyée = D suivi de R<small>R occupe exactement r bits, y compris les éventuels zéros à gauche.</small></div><p>Le récepteur divise la trame reçue par G <strong>sans rajouter de zéros</strong>. Reste nul = aucune erreur détectée ; ce n’est pas une preuve absolue d’absence d’erreur.</p><div class="lab"><h3>Entraînement : refaire la division XOR</h3><form id="crc-form"><div class="grid-two"><label>Données D (bits)<input id="crc-data" value="1101011011" pattern="[01]+" maxlength="64" spellcheck="false" required></label><label>Générateur G (bits)<input id="crc-gen" value="10011" pattern="1[01]+1" maxlength="17" spellcheck="false" required></label></div><div class="button-row"><button class="small-button" type="submit">Calculer et vérifier</button></div></form><div id="crc-result" aria-live="polite"></div></div><h3>Slotted ALOHA</h3><div class="formula">S(p) = Np(1 − p)<sup>N − 1</sup><br>p optimal = 1 / N<br>S maximal = (1 − 1/N)<sup>N − 1</sup><br>Limite quand N → ∞ : 1/e ≈ 0,368 = 36,8 %</div><p>Ces expressions supposent des stations indépendantes qui tentent chacune de transmettre avec la même probabilité p par créneau ; un seul émetteur signifie un succès. Pour N = 1, le maximum est p = 1 et S = 1. Ne confonds pas avec ALOHA non synchronisé.</p><div class="lab"><h3>Pourquoi trop de tentatives créent des collisions</h3><div class="grid-two"><label>Nombre de stations N<input id="aloha-n" type="number" min="1" max="200" value="10"></label><label>Probabilité de tentative p = <span id="aloha-p-value">0,10</span><input id="aloha-p" type="range" min="0" max="1" step="0.001" value="0.1"></label></div><div class="button-row"><button id="aloha-opt" class="small-button" type="button">Choisir p optimal</button></div><svg id="aloha-chart" class="diagram-svg" viewBox="0 0 700 235" role="img" aria-label="Efficacité de Slotted ALOHA en fonction de la probabilité de transmission"></svg><div id="aloha-result" class="result" aria-live="polite"></div><p class="caption">Le graphe zoome sur p de 0 à min(1, 4/N). Le curseur peut aller jusqu’à 1. Un créneau avec deux émetteurs ou plus est perdu dans ce modèle.</p></div><h3>Tag VLAN 802.1Q</h3><div class="formula">Tag = TPID (16 bits) + TCI (16 bits) = 4 octets<br>TCI = PCP (3) + DEI (1) + VID (12)<br>TPID = 0x8100<br>TCI = (PCP × 2<sup>13</sup>) + (DEI × 2<sup>12</sup>) + VID</div><p>Le VID donne 2<sup>12</sup> = 4 096 combinaisons ; les VLAN usuels vont de <strong>1 à 4094</strong>. 0 et 4095 ont des usages particuliers ou sont réservés. Avec PCP = 0 et DEI = 0, VLAN 10 donne un tag <code>81 00 00 0A</code> ; VLAN 20 donne <code>81 00 00 14</code>.</p><h3>Dijkstra</h3><div class="formula">d(v) ← min[d(v), d(u) + coût(u,v)]<small>On fixe d’abord le sommet non fixé de plus petite distance. Les coûts doivent être non négatifs.</small></div><p>Si la nouvelle valeur est plus petite, note aussi <strong>u comme prédécesseur de v</strong>. Pour reconstruire le trajet, remonte les prédécesseurs depuis la destination puis inverse l’ordre.</p><h3>Maillage complet</h3><div class="formula">Nombre de liaisons = n(n − 1) / 2<br>Nombre de connexions par nœud = n − 1</div><p>Pour 5 nœuds : 5 × 4 / 2 = 10 liaisons point à point non orientées. La division par deux évite de compter A–B et B–A deux fois.</p><p class="source">Sources : CM séances 1–2 et séance 3 ; TD exercices 1–5. Durée de transmission : exemple de consolidation. <a href="#s-sources">Voir les supports et les précisions</a>.</p></section>
+<section class="lesson" id="f-methode" data-group="formules"><h2>Les réflexes pour le contrôle</h2><p class="lead">Tu dois pouvoir expliquer le calcul, pas seulement retrouver le résultat.</p><ul class="checks"><li><label><input type="checkbox"><span><strong>Fragmentation.</strong> Je distingue longueur totale et données ; j’ajoute un en-tête par fragment et je calcule les offsets en blocs de 8.</span></label></li><li><label><input type="checkbox"><span><strong>Checksum.</strong> Je fais l’addition en hexadécimal, le report circulaire, puis le complément à un.</span></label></li><li><label><input type="checkbox"><span><strong>CRC.</strong> Je sais aligner G, faire des XOR et vérifier la trame reçue par un reste nul.</span></label></li><li><label><input type="checkbox"><span><strong>ALOHA.</strong> Je peux expliquer Np(1−p)<sup>N−1</sup>, dériver l’expression et retrouver 1/N puis 1/e.</span></label></li><li><label><input type="checkbox"><span><strong>VLAN.</strong> Je sais attribuer les ports, trouver les destinataires d’un broadcast et distinguer access, trunk et routage.</span></label></li><li><label><input type="checkbox"><span><strong>Dijkstra.</strong> Je fixe le minimum, actualise les voisins et conserve les prédécesseurs.</span></label></li><li><label><input type="checkbox"><span><strong>Le cours.</strong> Je sais nommer les 7 couches OSI et expliquer MAC, IP, port, switch, routeur et ARP.</span></label></li></ul><p class="caption">Ces cases servent à te repérer pendant cette session. Elles ne sont pas sauvegardées.</p><h3>Dans quel ordre réviser</h3><ol><li>Lis les <a href="#c-reperes">repères essentiels</a>, puis les chapitres qui te posent problème.</li><li>Refais les <a href="#e-fragmentation">exercices du TD</a> au brouillon, correction fermée.</li><li>Compare ton raisonnement à la correction et note l’étape où tu t’es trompé.</li><li>Change les données avec les calculateurs de la <a href="#f-formules">fiche formules</a> et recommence.</li><li>Après le cours du vendredi 2 octobre, ajoute les nouvelles notions et vérifie le périmètre du contrôle.</li></ol><div class="takeaway"><strong>Pour chaque réponse</strong><p>Écris les données utiles, la formule ou la règle, le calcul, l’unité, puis une phrase de vérification. En VLAN, justifie par le domaine de broadcast et le rôle du routeur.</p></div></section>
+<section class="lesson" id="s-sources" data-group="sources"><h2>Tes supports et la suite du cours</h2><p class="lead">Cette version s’appuie sur les documents présents dans « Comm & réseaux indus » au 1er octobre 2026.</p><div class="source-list"><div class="source-item"><strong>CM · Séances 1 et 2</strong><p>Concepts, topologies, OSI, encapsulation, IPv4, ARP, fragmentation, routage et Dijkstra.</p></div><div class="source-item"><strong>CM · Séance 3</strong><p>Couche liaison, détection d’erreurs, accès au support, Ethernet et VLAN.</p></div><div class="source-item"><strong>TD · Énoncé des exercices 1 à 5</strong><p>Les données originales, dont les quatre mots du checksum et les ports des VLAN.</p></div><div class="source-item"><strong>TD · Corrigé présent sur Drive</strong><p>Correction détaillée, exemples Dijkstra et inter-VLAN. La présence sur Drive ne confirme pas une validation par l’enseignante.</p></div><div class="source-item"><strong>TP1 · Énoncé</strong><p>Construction des réseaux avec Cisco Packet Tracer.</p></div><div class="source-item"><strong>TP1 · Compte rendu DOCX</strong><p>Scénario retenu pour les configurations corrigées. La version PDF plus ancienne est aussi disponible dans le dossier.</p></div><div class="source-item"><strong>TP1 · Tutoriel et configurations</strong><p>Variantes signalées séparément : les adresses et certains masques diffèrent du compte rendu.</p></div></div><h3>Ce qui reste à compléter vendredi 2 octobre</h3><div class="callout"><p><strong>Le nouveau cours n’est pas encore intégré.</strong> Dépose les nouveaux supports dans ton dossier Drive, puis demande dans cette conversation de compléter ce site.</p><p>Il faudra intégrer les nouvelles notions, les exercices corrigés en séance, les consignes du contrôle et mettre à jour les priorités de révision. Le site ne se synchronise pas automatiquement avec Drive.</p></div><h3>Comment lire cette version</h3><ul><li>Les données du TD sont conservées. Les adresses inter-VLAN et le graphe de Dijkstra sont des <strong>exemples pédagogiques présents dans le corrigé</strong>.</li><li>Les calculateurs et les schémas sont des aides ajoutées pour comprendre et s’entraîner.</li><li>Les imprécisions du cours sont explicitées : trame ≠ paquet, MTU ≠ longueur totale Ethernet, switch ≠ hub, réassemblage IPv4 à destination.</li><li>Le sommaire annonce aussi CAN, capteurs et réseaux de mesure : ces thèmes ne sont pas développés dans les supports lus. Ils ne sont donc pas présentés comme déjà étudiés.</li><li>Le TD et le corrigé portent l’année 2025–2026 ; les CM portent 2026–2027. Ce sont les supports présents dans le même dossier actuel.</li><li>Les résultats Packet Tracer sont ceux rapportés dans les documents. Les fichiers <code>.pkt</code> n’ont pas été exécutés ici.</li></ul><p class="source">Les documents originaux restent privés dans ton Drive. Leurs liens ne sont pas inclus dans cette version publique.</p><h3>Références techniques</h3><p><a href="https://www.rfc-editor.org/rfc/rfc791" target="_blank" rel="noopener">RFC 791 · IPv4</a> · <a href="https://www.rfc-editor.org/rfc/rfc1071" target="_blank" rel="noopener">RFC 1071 · Checksum Internet</a> · <a href="https://www.cisco.com/c/en/us/support/docs/lan-switching/8021q/17056-741-4.html" target="_blank" rel="noopener">Cisco · Format du tag 802.1Q</a></p><p class="source">Site personnel de révision · Dernière intégration : jeudi 1er octobre 2026 · Contrôle annoncé : lundi 5 octobre 2026.</p></section>
+</div><nav class="page-bottom" id="page-bottom" aria-label="Continuer la révision"></nav><p class="footer-note">Contenu fondé sur tes supports Drive. Les exemples ajoutés et les variantes des corrections sont signalés. Le périmètre exact du contrôle reste à confirmer en cours.</p></main></div></div><script src="app.js"></script></body></html>
