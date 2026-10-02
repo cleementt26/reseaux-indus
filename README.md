@@ -1,6 +1,6 @@
 # Réseaux · Réviser et comprendre
 
-Site de révision en français : une vue d’ensemble interactive, les chapitres de cours, les cinq exercices du TD1 et le protocole CAN du TD2, des schémas, des formules, des calculateurs et une méthode pour refaire le TP Packet Tracer.
+Site de révision en français : une vue d’ensemble interactive, les cours des séances 1 à 4, les cinq exercices du TD1 et les trois exercices du TD2, des schémas, des formules, des calculateurs et une méthode pour refaire le TP Packet Tracer.
 
 [Ouvrir le site de révision](https://cleementt26.github.io/revision-reseaux-communication/)
 
@@ -10,11 +10,11 @@ Site statique sans compilation ni dépendance externe. GitHub Pages doit publier
 
 ## Mise à jour
 
-Modifier les fichiers puis enregistrer les changements dans `main`. GitHub Pages republiera le site. Le CAN et les deux programmes Python du TD2 sont intégrés. Les autres notions du cours du 2 octobre restent à compléter. Les ajouts sont conservés dans `work/td2-*.html`, `work/td2-can.js` et `work/td2-can.css` du projet local ; `work/integrate-td2.py` assemble la version actuelle.
+Modifier les fichiers puis enregistrer les changements dans `main`. GitHub Pages republiera le site. Le TD2 et le CM séance 4 du 2 octobre sont intégrés : CAN, capteurs Python, temps réel, critères de choix d’un exécutif et ZigBee. Les ajouts sont conservés dans `work/td2-*.html`, `work/cm4-*.html`, `work/td2-can.js`, `work/td2-calculator.js` et `work/td2-can.css` du projet local ; `work/integrate-td2.py` assemble la version actuelle.
 
 ## Sources
 
-Contenu pédagogique établi à partir des CM séances 1–3, du TD et de son corrigé, ainsi que du TP1. Ajout : énoncé du TD2, partie CAN de la séance 4, Python CAN/capteurs et correction manuscrite de l’exercice 2. Les exemples ajoutés sont identifiés dans le site. Les documents originaux et leurs liens Drive ne sont pas publiés.
+Contenu pédagogique établi à partir des CM séances 1–3, du TD et de son corrigé, ainsi que du TP1. Ajout : énoncé du TD2, CM séance 4 lu entièrement (95 pages, tableaux des pages 21–25 inspectés visuellement), Python CAN/capteurs et correction manuscrite de l’exercice 2. Les exemples ajoutés sont identifiés dans le site. Les documents originaux et leurs liens Drive ne sont pas publiés.
 
 Les fichiers `.pkt` n'ont pas été exécutés pour créer ce site. Les résultats rapportés dans le TP sont distingués des vérifications effectuées sur les calculateurs du site.
 
