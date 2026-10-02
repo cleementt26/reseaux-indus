@@ -1,6 +1,6 @@
 # Réseaux · Réviser et comprendre
 
-Site de révision en français : 12 chapitres, les cinq exercices du TD corrigés pas à pas, des schémas, des formules, des calculateurs et une méthode pour refaire le TP Packet Tracer.
+Site de révision en français : une vue d’ensemble interactive, 12 chapitres, les cinq exercices du TD corrigés pas à pas, des schémas, des formules, des calculateurs et une méthode pour refaire le TP Packet Tracer.
 
 [Ouvrir le site de révision](https://cleementt26.github.io/revision-reseaux-communication/)
 
