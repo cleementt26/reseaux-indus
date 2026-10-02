@@ -209,3 +209,22 @@ pre{background:#172941;color:#e3edf8;border:1px solid #2c4362;border-radius:13px
 @media print{.summary-topics,.summary-reset,.summary-instruction,.summary-detail-links{display:none}.summary-scene,.summary-detail{box-shadow:none;break-inside:avoid}.journey-network{grid-template-columns:minmax(0,1fr) 100px minmax(0,1fr)}.summary-pdus{grid-template-columns:repeat(5,minmax(0,1fr))}}
 
 .summary-detail{scroll-margin-top:86px}
+
+/* Champs et expériences CAN : lecture par petites étapes. */
+.can-field-explorer{border:1px solid #d2e0ef;border-radius:16px;padding:22px;background:#f7faff;margin:24px 0}
+.can-fields{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0}
+.can-fields button{flex:1 1 90px;min-height:68px;padding:11px 10px;border:1px solid #bfcfe6;border-radius:10px;background:white;color:#294665;font-weight:750;line-height:1.5}
+.can-fields button small{display:block;font-size:11px;font-weight:500;margin-top:4px;color:#5a6e88}
+.can-fields button[aria-pressed=true]{background:#e5edff;border-color:#7894d8;color:#2347a1;box-shadow:0 0 0 2px #405ccc12}
+.can-field-detail{padding:19px 22px;background:white;border-left:3px solid #405ccc;border-radius:9px;min-height:185px}
+.can-field-detail h4{margin:0 0 10px;font-size:18px}.can-field-detail p{margin:9px 0;font-size:15px;line-height:1.75}
+.can-node{min-width:0;margin:0;padding:19px;border:1px solid #c7d7ec;border-radius:13px;background:#fff}.can-node legend{padding:0 7px;color:#385983;font-weight:750}.can-node label{display:block;margin:8px 0 13px}.can-node input[type=text],.can-node input:not([type]){font-family:ui-monospace,Menlo,monospace}
+.can-node .can-check{display:flex;align-items:center;gap:9px;font-size:14px;margin:17px 0 0}.can-check input[type=checkbox]{width:20px;height:20px;flex:0 0 20px;margin:0;accent-color:#405ccc}.can-node input:disabled{background:#edf1f6;color:#7d8796}
+.can-experiment-note{padding:13px 16px;border-radius:9px;background:#eaf1ff;font-size:14px;line-height:1.7}.can-bit-table table{min-width:810px;font-size:12px}.can-bit-table th:first-child{min-width:138px}.can-bit-table td,.can-bit-table th{text-align:center!important;padding:11px 9px!important}.can-bit-table td{font-family:ui-monospace,Menlo,monospace}.can-bit-table .can-deciding{background:#d8f1e8!important;color:#125748;font-weight:800;border-top:1px solid #97cdbc;border-bottom:1px solid #97cdbc}.can-lab .result{margin-top:15px;line-height:1.8}
+.can-process li{padding:5px 0 13px}.can-process strong{color:#294b7d}
+.can-story-buttons button[aria-pressed=true]{background:#405ccc;color:#fff;border-color:#405ccc}.can-story-buttons button[aria-pressed=false]{background:#fff;color:#3853ac;border-color:#bccde6}
+.can-presets button[aria-pressed=true]{background:#405ccc;color:#fff;border-color:#405ccc}.can-presets button[aria-pressed=false]{background:#fff;color:#3853ac;border-color:#bccde6}
+#distance-lab .grid-two>*{min-width:0}
+.can-length-bar{display:flex;gap:4px;margin:20px 0;min-height:64px}.can-length-bar span{display:flex;align-items:center;justify-content:center;padding:13px 8px;background:#e3ebff;color:#294d96;border-radius:9px;font-size:13px;font-weight:750;min-width:0;text-align:center}.can-length-bar #can-data-size{background:#dbf2e7;color:#1d6654}.can-length-bar span[hidden]{display:none}
+.quiz-card{padding:22px 24px;margin:20px 0;border:1px solid #d3deeb;border-radius:13px;background:#fff;min-width:0}.quiz-card legend{padding:0 7px;font-size:12px;color:#5b6f8b;font-weight:750}.quiz-question{font-weight:750;color:#294665;margin:2px 0 14px!important}.quiz-options{display:grid;gap:9px}.quiz-options label{display:flex;align-items:flex-start;gap:11px;padding:11px 14px;border:1px solid #e0e7f0;border-radius:9px;font-size:14px;line-height:1.65;cursor:pointer}.quiz-options input[type=radio]{flex:0 0 19px;width:19px;height:19px;min-height:19px;accent-color:#405ccc;margin:2px 0 0;padding:0}.quiz-feedback{margin-top:15px;padding:13px 16px;border-radius:9px;font-size:14px;line-height:1.75}.quiz-correct{background:#e3f5ed;color:#1d6451}.quiz-retry{background:#fff2e2;color:#795324}.quiz-pending{background:#eff3fa;color:#536780}
+@media(max-width:760px){.can-field-explorer{padding:17px 15px}.can-fields{gap:8px}.can-fields button{flex-basis:105px}.can-field-detail{padding:17px 15px;min-height:0}.can-node{padding:15px}.can-presets .small-button{font-size:12px}.can-experiment-note{padding:12px 14px}.can-lab{padding:20px 16px}}
