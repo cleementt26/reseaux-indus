@@ -2,7 +2,7 @@
 
 Site de révision en français : une vue d’ensemble interactive, les cours des séances 1 à 4, les cinq exercices du TD1 et les trois exercices du TD2, des schémas, des formules, des calculateurs et une méthode pour refaire le TP Packet Tracer.
 
-[Ouvrir le site de révision](https://cleementt26.github.io/revision-reseaux-communication/)
+[Ouvrir le site de révision](https://cleementt26.github.io/reseaux-indus/)
 
 ## Hébergement
 
